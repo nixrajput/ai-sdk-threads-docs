@@ -6,7 +6,7 @@ const base = process.env.BASE_URL ?? "http://localhost:3000";
 // Routes whose page does not exist yet. Listed rather than omitted so a shortened
 // check is visible in the output instead of reading as full coverage. Empty this
 // as the pages land; the run fails once it is empty and a route still 404s.
-const PENDING = new Set(["/en/playground"]);
+const PENDING = new Set();
 
 async function expectOk(path) {
   if (PENDING.has(path)) {
@@ -99,7 +99,18 @@ console.log("PASS: og-image and llms markdown routes serve unprefixed");
 // Non-localized routes must serve directly, never via a redirect. This is the
 // class of bug that has bitten five times: the i18n proxy rewrites a top-level
 // route into /en/..., which 404s, and the redirect step still reports 200.
-for (const path of ["/icon.svg", "/apple-icon", "/sitemap.xml", "/robots.txt", "/llms.txt"]) {
+for (const path of [
+  "/icon.svg",
+  "/apple-icon",
+  "/sitemap.xml",
+  "/robots.txt",
+  "/llms.txt",
+  // The playground fetches these at runtime; a locale redirect here breaks the demo
+  // with a WASM error that looks like a bundler problem rather than a routing one.
+  "/pglite/pglite.wasm",
+  "/pglite/initdb.wasm",
+  "/pglite/pglite.data",
+]) {
   const r = await fetch(`${base}${path}`, { redirect: "manual" });
   if (r.status !== 200) {
     console.error(

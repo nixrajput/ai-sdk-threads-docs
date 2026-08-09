@@ -33,3 +33,5 @@ next-env.d.ts
 
 # typecheck-samples extraction output
 .samples/
+# pglite assets, copied from node_modules by scripts/copy-pglite.mjs
+/public/pglite

@@ -27,6 +27,7 @@ const NON_LOCALIZED_ROUTES = [
   '/llms.mdx',
   '/og',
   '/api',
+  '/pglite',
   '/sitemap.xml',
   '/robots.txt',
 ];

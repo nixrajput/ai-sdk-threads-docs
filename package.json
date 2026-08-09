@@ -3,7 +3,9 @@
   "private": true,
   "license": "MIT",
   "scripts": {
+    "prebuild": "node scripts/copy-pglite.mjs",
     "build": "next build",
+    "predev": "node scripts/copy-pglite.mjs",
     "dev": "next dev",
     "start": "next start",
     "lint": "eslint",
