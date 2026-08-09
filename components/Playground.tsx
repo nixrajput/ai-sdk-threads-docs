@@ -12,7 +12,15 @@ type Store = ReturnType<typeof createThreadStore>;
 type Row = Awaited<ReturnType<Store["getTree"]>>[number];
 
 const THREAD_ID = "demo";
-const DB_NAME = "idb://ai-sdk-threads-demo";
+
+// Versioned: the DDL runs CREATE TABLE IF NOT EXISTS, so a returning visitor keeps the
+// schema from their first visit. Bump this whenever playground-ddl.ts changes, or they get
+// a stale database that the boot probe is too shallow to catch.
+const DB_NAME = "idb://ai-sdk-threads-demo-v1";
+
+// Module-level and never a parameter: this string is the specifier of a dynamic import, so
+// anything caller-supplied reaching it would be script execution on our own origin.
+const PGLITE_ENTRY = "/pglite/index.js";
 
 const msg = (id: string, role: "user" | "assistant", text: string): UIMessage =>
   ({ id, role, parts: [{ type: "text", text }] }) as UIMessage;
@@ -26,8 +34,7 @@ const textOf = (row: Row) => {
 // glue into "m.instantiateWasm is not a function", and prebuilt WebAssembly.Modules do not
 // avoid it. Variable specifier so no bundler can claim it. Dist copied to /pglite.
 async function loadPGlite(): Promise<typeof PGlite> {
-  const entry = "/pglite/index.js";
-  const mod = (await import(/* webpackIgnore: true */ entry)) as { PGlite: typeof PGlite };
+  const mod = (await import(/* webpackIgnore: true */ PGLITE_ENTRY)) as { PGlite: typeof PGlite };
   return mod.PGlite;
 }
 
