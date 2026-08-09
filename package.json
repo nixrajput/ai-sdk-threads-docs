@@ -13,7 +13,8 @@
     "format": "prettier --write \"{app,components,lib,scripts}/**/*.{ts,tsx,css}\"",
     "format:check": "prettier --check \"{app,components,lib,scripts}/**/*.{ts,tsx,css}\"",
     "check:samples": "tsx scripts/check-samples.ts && tsc -p tsconfig.samples.json",
-    "check:routes": "node scripts/check-routes.mjs"
+    "check:routes": "node scripts/check-routes.mjs",
+    "check:vitals": "node scripts/check-vitals.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.4",

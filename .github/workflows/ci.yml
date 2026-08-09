@@ -18,7 +18,9 @@ jobs:
       - run: npm run check:samples
       - run: npm run format:check
       - run: npm run build
-      - name: Check routes
+      # Routes and budgets share one server: starting `next start` twice would double the
+      # slowest step in the job for no extra signal.
+      - name: Check routes and budgets
         run: |
           set +e
           npm start &
@@ -28,6 +30,10 @@ jobs:
             sleep 1
           done
           npm run check:routes
-          EXIT_CODE=$?
+          ROUTES=$?
+          npm run check:vitals
+          VITALS=$?
           kill $SERVER_PID
-          exit $EXIT_CODE
+          [ $ROUTES -eq 0 ] && [ $VITALS -eq 0 ]
+        env:
+          BASE_URL: http://localhost:3000
