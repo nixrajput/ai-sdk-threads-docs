@@ -1,0 +1,65 @@
+name: Feature Request
+description: Suggest an improvement for the mcp-vitest documentation site
+title: '[Feature Request]: '
+labels: ['enhancement']
+assignees:
+  - nixrajput
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature!
+        Before submitting, check [existing issues](https://github.com/nixrajput/mcp-vitest-docs/issues) to see if it has already been proposed.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Scope / area
+      description: Which part of the site does this relate to?
+      multiple: false
+      options:
+        - Docs content
+        - Site UI / navigation
+        - Search
+        - Build / deploy
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What problem does this feature solve? Why is it needed?
+      placeholder: 'When reading the docs, I find it hard to ...'
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe the feature or content you would like to see.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any workarounds you use today, or alternative approaches you have thought about?
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Any other information or references that would help.
+
+  - type: checkboxes
+    id: conduct
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue you agree to follow our [Code of Conduct](https://github.com/nixrajput/mcp-vitest-docs/blob/main/CODE_OF_CONDUCT.md).
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true

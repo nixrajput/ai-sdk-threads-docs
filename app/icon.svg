@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="era" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#f0a868" />
+      <stop offset="1" stop-color="#9b8cff" />
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="7" fill="#141118" />
+  <!-- One pass, spanning both protocol eras: the stroke runs amber (2025-11-25)
+       into violet (2026-07-28), the same two colors the site codes eras with. -->
+  <path
+    d="M8 16.5 L13.5 22 L24 10"
+    fill="none"
+    stroke="url(#era)"
+    stroke-width="3.2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>

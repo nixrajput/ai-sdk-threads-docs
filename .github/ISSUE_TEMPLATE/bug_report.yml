@@ -1,0 +1,81 @@
+name: Bug Report
+description: File a bug report for the mcp-vitest documentation site
+title: '[Bug]: '
+labels: ['bug', 'triage']
+assignees: ['nixrajput']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report.
+        Before submitting, please check the [existing issues](https://github.com/nixrajput/mcp-vitest-docs/issues) to avoid duplicates.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      description: Which part of the site is affected?
+      multiple: false
+      options:
+        - Docs content (wrong or missing information)
+        - Code sample (does not compile or run)
+        - Search
+        - Navigation / sidebar
+        - Site UI (theme, layout, responsiveness)
+        - Build / deploy
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the bug clearly. What did you see, and what did you expect?
+      placeholder: 'Expected: ... Actual: ...'
+    validations:
+      required: true
+
+  - type: input
+    id: page
+    attributes:
+      label: Page URL
+      description: The page where you saw the issue.
+      placeholder: 'https://mcp-vitest.nixrajput.com/docs/...'
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: How can we see the same thing?
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: input
+    id: env
+    attributes:
+      label: Browser and device
+      description: Relevant for site UI issues.
+      placeholder: 'e.g. Chrome 128 on macOS, iPhone Safari'
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or screenshots
+      description: Paste any error output. Formatted as code.
+      render: shell
+
+  - type: checkboxes
+    id: conduct
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue you agree to follow our [Code of Conduct](https://github.com/nixrajput/mcp-vitest-docs/blob/main/CODE_OF_CONDUCT.md).
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true

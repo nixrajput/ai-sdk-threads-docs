@@ -1,0 +1,13 @@
+# .github/labeler.yml - path-based PR auto-labels (actions/labeler@v5 format).
+documentation:
+  - changed-files:
+      - any-glob-to-any-file: ['content/**']
+site:
+  - changed-files:
+      - any-glob-to-any-file: ['app/**', 'components/**', 'lib/**']
+ci:
+  - changed-files:
+      - any-glob-to-any-file: ['.github/**', '.githooks/**']
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file: ['package.json', 'package-lock.json']

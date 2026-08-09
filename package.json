@@ -1,0 +1,47 @@
+{
+  "name": "ai-sdk-threads-docs",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "start": "next start",
+    "lint": "eslint",
+    "types:check": "next typegen && tsc --noEmit",
+    "format": "prettier --write \"{app,components,lib,scripts}/**/*.{ts,tsx,css}\"",
+    "format:check": "prettier --check \"{app,components,lib,scripts}/**/*.{ts,tsx,css}\"",
+    "check:samples": "tsx scripts/check-samples.ts && tsc -p tsconfig.samples.json",
+    "check:routes": "node scripts/check-routes.mjs"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.5.4",
+    "@vercel/analytics": "^2.0.1",
+    "cnfast": "^0.1.0",
+    "drizzle-orm": "^0.45.2",
+    "fumadocs-core": "16.14.2",
+    "fumadocs-mdx": "15.2.2",
+    "fumadocs-ui": "16.14.2",
+    "lucide-react": "^1.28.0",
+    "next": "16.3.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/mdx": "^2.0.14",
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "ai": "^7.0.58",
+    "ai-sdk-threads": "^0.1.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.0",
+    "postcss": "^8.5.25",
+    "prettier": "^3.9.6",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "resumable-stream": "^2.2.12",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.11",
+    "typescript": "^6.0.3"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "fumadocs",
+    "lifecycles",
+    "mcp",
+    "mdx",
+    "modelcontextprotocol",
+    "nextjs",
+    "nixrajput",
+    "orama",
+    "sarif",
+    "scorecard",
+    "shiki",
+    "Streamable",
+    "tailwind",
+    "vercel",
+    "vitest"
+  ],
+  "ignorePaths": [
+    "node_modules/**",
+    ".next/**",
+    ".source/**",
+    "package-lock.json"
+  ]
+}

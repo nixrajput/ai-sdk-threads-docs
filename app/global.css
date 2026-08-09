@@ -1,0 +1,163 @@
+@import "tailwindcss";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
+
+html {
+  scrollbar-gutter: stable;
+}
+
+html > body[data-scroll-locked] {
+  margin-right: 0px !important;
+  --removed-body-scroll-bar-size: 0px !important;
+}
+
+/* Amber is always the legacy protocol revision (2025-11-25), violet is always
+   the modern one (2026-07-28) - structural everywhere on this page. :root
+   holds light values; .dark overrides, mirroring fumadocs-ui's own split.
+
+   The --color-fd-* reassignments below make these the site's real ground,
+   not just page accents: fumadocs-ui sets its own --color-fd-background etc.
+   in default-colors.css (some inside @layer theme, some as plain .dark{}),
+   and body { background: var(--color-fd-background) } in @layer base reads
+   whichever wins. An unlayered block always beats a layered one, and among
+   unlayered blocks the one later in the stylesheet wins at equal
+   specificity - so redeclaring the same var names here, after the imports,
+   takes over both mechanisms without an !important fight. */
+:root {
+  --ground: #f7f5fb;
+  --surface: #ece8f2;
+  --line: #dad2e4;
+  --pass: #12875e;
+  --era-now: #5b3fe0;
+  --era-old: #a15a10;
+  --paper: #171320;
+  --muted: #6b6478;
+
+  --color-fd-background: var(--ground);
+  --color-fd-foreground: var(--paper);
+  --color-fd-card: var(--surface);
+  --color-fd-card-foreground: var(--paper);
+  --color-fd-popover: var(--surface);
+  --color-fd-popover-foreground: var(--paper);
+  --color-fd-muted: var(--surface);
+  --color-fd-muted-foreground: var(--muted);
+  --color-fd-secondary: var(--surface);
+  --color-fd-secondary-foreground: var(--paper);
+  --color-fd-border: var(--line);
+  --color-fd-primary: var(--paper);
+  --color-fd-primary-foreground: var(--ground);
+  --color-fd-ring: var(--era-now);
+}
+
+.dark {
+  --ground: #141118;
+  --surface: #1c1822;
+  --line: #2b2533;
+  --pass: #5ee6a8;
+  --era-now: #9b8cff;
+  --era-old: #f0a868;
+  --paper: #e9e6ef;
+  --muted: #8b8496;
+
+  --color-fd-background: var(--ground);
+  --color-fd-foreground: var(--paper);
+  --color-fd-card: var(--surface);
+  --color-fd-card-foreground: var(--paper);
+  --color-fd-popover: var(--surface);
+  --color-fd-popover-foreground: var(--paper);
+  --color-fd-muted: var(--surface);
+  --color-fd-muted-foreground: var(--muted);
+  --color-fd-secondary: var(--surface);
+  --color-fd-secondary-foreground: var(--paper);
+  --color-fd-border: var(--line);
+  --color-fd-primary: var(--paper);
+  --color-fd-primary-foreground: var(--ground);
+  --color-fd-ring: var(--era-now);
+}
+
+/* neutral.css targets the sidebar specifically with the same .dark #nd-sidebar
+   selector at equal specificity - redeclare it here, later in the sheet, so
+   the sidebar picks up the palette instead of fumadocs' own grayscale. */
+.dark #nd-sidebar {
+  --color-fd-muted: var(--surface);
+  --color-fd-secondary: var(--surface);
+  --color-fd-muted-foreground: var(--muted);
+}
+
+/* The aside's own bg-fd-card reads --surface at full strength, which read as
+   a second panel stitched onto the page. Softening it toward --ground (kept
+   as color-mix so it flips with --surface/--ground per theme, no .dark copy
+   needed) lets docs read as one surface while nav hover/active states above
+   still pop against it since those keep the untouched --surface value. */
+#nd-sidebar {
+  --color-fd-card: color-mix(in srgb, var(--surface) 35%, var(--ground) 65%);
+}
+
+/* Registering these as theme fonts (rather than a one-off utility class) means
+   the existing font-mono usage in InstallCommand picks up JetBrains Mono for
+   free, with no change to that component. */
+@theme {
+  --font-display: var(--font-bricolage), var(--font-sans);
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", monospace;
+}
+
+/* Fumadocs sets these in @layer utilities at the same breakpoints (md, xl);
+   unlayered rules always beat layered ones regardless of specificity, so this
+   narrows both without touching the mobile drawer, which sizes itself alone. */
+@media (width >= 48rem) {
+  #nd-docs-layout {
+    --fd-sidebar-width: 220px;
+  }
+}
+
+@media (width >= 80rem) {
+  #nd-docs-layout {
+    --fd-toc-width: 200px;
+  }
+}
+
+/* Scroll reveal, progressive enhancement: the .reveal class is only ever added
+   by Reveal.tsx once JS + IntersectionObserver + normal motion are confirmed,
+   so SSR and no-JS renders stay fully visible. */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--rise-delay, 0s);
+}
+
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Two soft blobs keyed to the era colors, standing in for the amber/violet
+   duality the whole page is built on. Kept as a background-image (not an
+   element) so it never intercepts clicks and never needs its own stacking
+   context beyond the hero's own isolate. */
+.hero-wash {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    radial-gradient(
+      40% 50% at 28% 20%,
+      color-mix(in srgb, var(--era-old) 20%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      40% 50% at 74% 12%,
+      color-mix(in srgb, var(--era-now) 20%, transparent),
+      transparent 70%
+    );
+}
