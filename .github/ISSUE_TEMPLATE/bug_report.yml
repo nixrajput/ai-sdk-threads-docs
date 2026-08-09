@@ -1,5 +1,5 @@
 name: Bug Report
-description: File a bug report for the mcp-vitest documentation site
+description: File a bug report for the ai-sdk-threads documentation site
 title: '[Bug]: '
 labels: ['bug', 'triage']
 assignees: ['nixrajput']
@@ -8,7 +8,7 @@ body:
     attributes:
       value: |
         Thanks for taking the time to fill out this bug report.
-        Before submitting, please check the [existing issues](https://github.com/nixrajput/mcp-vitest-docs/issues) to avoid duplicates.
+        Before submitting, please check the [existing issues](https://github.com/nixrajput/ai-sdk-threads-docs/issues) to avoid duplicates.
 
   - type: dropdown
     id: area
@@ -41,7 +41,7 @@ body:
     attributes:
       label: Page URL
       description: The page where you saw the issue.
-      placeholder: 'https://mcp-vitest.nixrajput.com/docs/...'
+      placeholder: 'https://ai-sdk-threads.nixrajput.com/en/docs/...'
     validations:
       required: true
 
@@ -75,7 +75,7 @@ body:
     id: conduct
     attributes:
       label: Code of Conduct
-      description: By submitting this issue you agree to follow our [Code of Conduct](https://github.com/nixrajput/mcp-vitest-docs/blob/main/CODE_OF_CONDUCT.md).
+      description: By submitting this issue you agree to follow our [Code of Conduct](https://github.com/nixrajput/ai-sdk-threads-docs/blob/main/CODE_OF_CONDUCT.md).
       options:
         - label: I agree to follow this project's Code of Conduct
           required: true

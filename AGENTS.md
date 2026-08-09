@@ -1,16 +1,16 @@
 # AI Agent Guidelines
 
-Last updated: 2026-08-09
+Last updated: 2026-08-10
 
 ---
 
 ## Project
 
-This repo is the documentation site for the **mcp-vitest** npm package, deployed at https://mcp-vitest.nixrajput.com. It is a Next.js + Fumadocs app.
+This repo is the documentation site for the **ai-sdk-threads** npm package, deployed at https://ai-sdk-threads.nixrajput.com. It is a Next.js + Fumadocs app.
 
 | Area          | Detail                                                     |
 | ------------- | ---------------------------------------------------------- |
-| Language      | TypeScript, ESM only, Node `>=20`                          |
+| Language      | TypeScript, ESM only, Node `>=20.9`                        |
 | Framework     | Next.js 16 (App Router) + Fumadocs                         |
 | Lint / format | ESLint + Prettier - double quotes, semicolons, 100 columns |
 | Content       | MDX under `content/docs/en/`                               |
@@ -18,13 +18,19 @@ This repo is the documentation site for the **mcp-vitest** npm package, deployed
 ### Layout
 
 ```
-app/[lang]/...    route segments (i18n-aware; [lang] currently resolves to "en")
-content/docs/en/  MDX documentation source
-lib/source.ts     Fumadocs content source adapter
-lib/shared.ts     shared layout options
-lib/i18n.ts       i18n config (locales, default locale)
-proxy.ts          i18n routing
+app/[lang]/...        route segments (i18n-aware; [lang] currently resolves to "en")
+content/docs/en/      MDX documentation source
+lib/source.ts         Fumadocs content source adapter
+lib/shared.ts         site constants (URL, tagline, repo and npm links, install command)
+lib/layout.shared.tsx nav options shared by the home and docs layouts
+lib/i18n.ts           i18n config (locales, default locale)
+proxy.ts              i18n routing plus the non-localized route allowlist
 ```
+
+### Two things that will bite you
+
+1. **`app/[lang]/layout.tsx` is the root layout. There is no `app/layout.tsx`.** That is what makes `<html lang>` dynamic, and it is legal only because nothing outside `[lang]` is a page. Do not add one.
+2. **A new top-level route must be added to `NON_LOCALIZED_ROUTES` in `proxy.ts`.** Otherwise the i18n proxy rewrites it into `/en/...`, which 404s - and the redirect step still reports 200, so nothing looks wrong. This has already cost five debugging sessions across the two sites. `npm run check:routes` asserts every such route serves 200 under `redirect: "manual"`, which is the guard that catches it.
 
 ### Commands
 
@@ -49,7 +55,9 @@ npm run lint && npm run types:check && npm run check:samples && npm run format:c
 
 ### Cross-repo coupling
 
-This is the most important thing in this file. This site owns its documentation **content**; the `mcp-vitest` package itself lives in a separate repo, [`nixrajput/mcp-vitest`](https://github.com/nixrajput/mcp-vitest). When the package's public API changes, the matching documentation change happens **here**, in a separate PR against this repo - never bundled into a PR on the package repo.
+This is the most important thing in this file. This site owns its documentation **content**; the `ai-sdk-threads` package itself lives in a separate repo, [`nixrajput/ai-sdk-threads`](https://github.com/nixrajput/ai-sdk-threads). When the package's public API changes, the matching documentation change happens **here**, in a separate PR against this repo - never bundled into a PR on the package repo.
+
+`npm run check:samples` is what keeps that split honest: it extracts every `ts`/`tsx` code fence from `content/docs/**` and typechecks it against `ai-sdk-threads` **installed from npm**, so the docs prove the shipped package behaves as documented. Mark a fence `notype` only when it illustrates prose rather than usable code, and `fragment` when it assumes the ambient `db`, `store` and `threadId` the extractor declares.
 
 ### Versioning
 

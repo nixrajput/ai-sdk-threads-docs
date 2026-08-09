@@ -1,6 +1,6 @@
-# Contributing to mcp-vitest docs
+# Contributing to ai-sdk-threads docs
 
-Thanks for your interest in improving the mcp-vitest documentation site. This repo holds the docs content and the Next.js/Fumadocs site that serves it at https://mcp-vitest.nixrajput.com - it does not hold the package itself, which lives at [nixrajput/mcp-vitest](https://github.com/nixrajput/mcp-vitest).
+Thanks for your interest in improving the ai-sdk-threads documentation site. This repo holds the docs content and the Next.js/Fumadocs site that serves it at https://ai-sdk-threads.nixrajput.com - it does not hold the package itself, which lives at [nixrajput/ai-sdk-threads](https://github.com/nixrajput/ai-sdk-threads).
 
 ## Code of Conduct
 
@@ -8,11 +8,11 @@ Please review and adhere to our [Code of Conduct](CODE_OF_CONDUCT.md). We expect
 
 ## Getting set up
 
-Requires Node.js `>=20` and npm.
+Requires Node.js `>=20.9` and npm.
 
 ```bash
-git clone https://github.com/nixrajput/mcp-vitest-docs.git
-cd mcp-vitest-docs
+git clone https://github.com/nixrajput/ai-sdk-threads-docs.git
+cd ai-sdk-threads-docs
 npm install
 git config core.hooksPath .githooks   # optional: runs the checks below before each push
 npm run dev
@@ -48,19 +48,19 @@ npm run build         # next build
 
 1. **Fork and branch.** Branch off `main` with a descriptive name (`docs/add-matchers-page`, `fix/broken-link`).
 2. **Keep the diff surgical.** Every changed line should trace to the change you are making. No drive-by refactors, no speculative abstractions.
-3. **Docs belong here, package changes don't.** If the change is about the npm package's behavior rather than its documentation, it belongs in [nixrajput/mcp-vitest](https://github.com/nixrajput/mcp-vitest) instead.
+3. **Docs belong here, package changes don't.** If the change is about the npm package's behavior rather than its documentation, it belongs in [nixrajput/ai-sdk-threads](https://github.com/nixrajput/ai-sdk-threads) instead.
 4. **Open the PR.** Fill in the template. The PR title becomes the squash commit message on merge, so write it in Conventional Commit form (`docs: add matchers page`) and keep it under ~50 characters.
 
 ## Conventions
 
 - **Commits:** Conventional Commits (`docs:`, `fix:`, `feat:`, `ci:`, `chore:`, `refactor:`), imperative subject, no trailing period.
 - **Style:** Prettier, double quotes, semicolons, 100-column lines. Do not hand-format - run `npm run format`.
-- **Language:** TypeScript, ESM only, Node `>=20`.
+- **Language:** TypeScript, ESM only, Node `>=20.9`.
 - **Comments:** explain why, not what. Most code needs none.
 
 ## Reporting issues
 
-Bugs and feature requests go to [Issues](https://github.com/nixrajput/mcp-vitest-docs/issues). Security issues follow [SECURITY.md](SECURITY.md) instead - never a public issue.
+Bugs and feature requests go to [Issues](https://github.com/nixrajput/ai-sdk-threads-docs/issues). Security issues follow [SECURITY.md](SECURITY.md) instead - never a public issue.
 
 ## Thank you
 

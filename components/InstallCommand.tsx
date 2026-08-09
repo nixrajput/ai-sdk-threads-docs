@@ -24,7 +24,7 @@ export function InstallCommand() {
           setTimeout(() => setFailed(false), 1500);
         }
       }}
-      className="border-fd-border bg-fd-card flex items-center gap-3 rounded-lg border px-4 py-3 font-mono text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--era-now)"
+      className="border-fd-border bg-fd-card flex items-center gap-3 rounded-lg border px-4 py-3 font-mono text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--live)"
     >
       <span className="text-fd-muted-foreground">$</span>
       <span>{INSTALL_CMD}</span>

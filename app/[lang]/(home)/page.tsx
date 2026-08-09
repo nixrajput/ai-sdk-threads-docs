@@ -22,13 +22,13 @@ export default async function HomePage(props: PageProps<"/[lang]">) {
           <div className="flex gap-4 text-sm">
             <a
               href={REPO_URL}
-              className="text-fd-muted-foreground hover:text-fd-foreground rounded-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--era-now)"
+              className="text-fd-muted-foreground hover:text-fd-foreground rounded-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--live)"
             >
               GitHub
             </a>
             <a
               href={NPM_URL}
-              className="text-fd-muted-foreground hover:text-fd-foreground rounded-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--era-now)"
+              className="text-fd-muted-foreground hover:text-fd-foreground rounded-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--live)"
             >
               npm
             </a>

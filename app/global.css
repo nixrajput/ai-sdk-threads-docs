@@ -11,9 +11,10 @@ html > body[data-scroll-locked] {
   --removed-body-scroll-bar-size: 0px !important;
 }
 
-/* Amber is always the legacy protocol revision (2025-11-25), violet is always
-   the modern one (2026-07-28) - structural everywhere on this page. :root
-   holds light values; .dark overrides, mirroring fumadocs-ui's own split.
+/* Violet is always the live path, amber always an abandoned sibling - the one
+   duality this package is about, so the pair carries meaning wherever it
+   appears rather than decorating. :root holds light values; .dark overrides,
+   mirroring fumadocs-ui's own split.
 
    The --color-fd-* reassignments below make these the site's real ground,
    not just page accents: fumadocs-ui sets its own --color-fd-background etc.
@@ -27,9 +28,8 @@ html > body[data-scroll-locked] {
   --ground: #f7f5fb;
   --surface: #ece8f2;
   --line: #dad2e4;
-  --pass: #12875e;
-  --era-now: #5b3fe0;
-  --era-old: #a15a10;
+  --live: #5b3fe0;
+  --stale: #a15a10;
   --paper: #171320;
   --muted: #6b6478;
 
@@ -46,16 +46,15 @@ html > body[data-scroll-locked] {
   --color-fd-border: var(--line);
   --color-fd-primary: var(--paper);
   --color-fd-primary-foreground: var(--ground);
-  --color-fd-ring: var(--era-now);
+  --color-fd-ring: var(--live);
 }
 
 .dark {
   --ground: #141118;
   --surface: #1c1822;
   --line: #2b2533;
-  --pass: #5ee6a8;
-  --era-now: #9b8cff;
-  --era-old: #f0a868;
+  --live: #9b8cff;
+  --stale: #f0a868;
   --paper: #e9e6ef;
   --muted: #8b8496;
 
@@ -72,7 +71,7 @@ html > body[data-scroll-locked] {
   --color-fd-border: var(--line);
   --color-fd-primary: var(--paper);
   --color-fd-primary-foreground: var(--ground);
-  --color-fd-ring: var(--era-now);
+  --color-fd-ring: var(--live);
 }
 
 /* neutral.css targets the sidebar specifically with the same .dark #nd-sidebar
@@ -139,25 +138,4 @@ html > body[data-scroll-locked] {
     opacity: 1;
     transform: none;
   }
-}
-
-/* Two soft blobs keyed to the era colors, standing in for the amber/violet
-   duality the whole page is built on. Kept as a background-image (not an
-   element) so it never intercepts clicks and never needs its own stacking
-   context beyond the hero's own isolate. */
-.hero-wash {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-image:
-    radial-gradient(
-      40% 50% at 28% 20%,
-      color-mix(in srgb, var(--era-old) 20%, transparent),
-      transparent 70%
-    ),
-    radial-gradient(
-      40% 50% at 74% 12%,
-      color-mix(in srgb, var(--era-now) 20%, transparent),
-      transparent 70%
-    );
 }

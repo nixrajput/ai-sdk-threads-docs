@@ -1,5 +1,5 @@
 name: Feature Request
-description: Suggest an improvement for the mcp-vitest documentation site
+description: Suggest an improvement for the ai-sdk-threads documentation site
 title: '[Feature Request]: '
 labels: ['enhancement']
 assignees:
@@ -9,7 +9,7 @@ body:
     attributes:
       value: |
         Thanks for suggesting a feature!
-        Before submitting, check [existing issues](https://github.com/nixrajput/mcp-vitest-docs/issues) to see if it has already been proposed.
+        Before submitting, check [existing issues](https://github.com/nixrajput/ai-sdk-threads-docs/issues) to see if it has already been proposed.
 
   - type: dropdown
     id: area
@@ -59,7 +59,7 @@ body:
     id: conduct
     attributes:
       label: Code of Conduct
-      description: By submitting this issue you agree to follow our [Code of Conduct](https://github.com/nixrajput/mcp-vitest-docs/blob/main/CODE_OF_CONDUCT.md).
+      description: By submitting this issue you agree to follow our [Code of Conduct](https://github.com/nixrajput/ai-sdk-threads-docs/blob/main/CODE_OF_CONDUCT.md).
       options:
         - label: I agree to follow this project's Code of Conduct
           required: true

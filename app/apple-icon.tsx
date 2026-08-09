@@ -20,19 +20,19 @@ export default function AppleIcon() {
     >
       {/* No <title>: satori renders it as visible text rather than metadata. */}
       <svg width="120" height="120" viewBox="0 0 32 32">
-        <defs>
-          <linearGradient id="era" x1="0" y1="1" x2="1" y2="0">
-            <stop offset="0" stopColor="#f0a868" />
-            <stop offset="1" stopColor="#9b8cff" />
-          </linearGradient>
-        </defs>
         <path
-          d="M8 16.5 L13.5 22 L24 10"
+          d="M7 5 L7 16 Q7 23 14 23 L26 23"
           fill="none"
-          stroke="url(#era)"
+          stroke="#f0a868"
           strokeWidth="3.2"
           strokeLinecap="round"
-          strokeLinejoin="round"
+        />
+        <path
+          d="M7 16 Q7 9 14 9 L26 9"
+          fill="none"
+          stroke="#9b8cff"
+          strokeWidth="3.2"
+          strokeLinecap="round"
         />
       </svg>
     </div>,

@@ -2,7 +2,9 @@
 
 ## Supported versions
 
-This site is not versioned. The deployed site at https://mcp-vitest.nixrajput.com is the only supported surface.
+This site is not versioned or published. The deployed site at https://ai-sdk-threads.nixrajput.com is the only supported surface.
+
+**This repo is the documentation site, not the package.** A vulnerability in the `ai-sdk-threads` npm package belongs in the [package repo's advisories](https://github.com/nixrajput/ai-sdk-threads/security/advisories/new), because that is the artifact people install. Report here only for issues in the site itself.
 
 ## Reporting a vulnerability
 
@@ -12,7 +14,7 @@ This site is not versioned. The deployed site at https://mcp-vitest.nixrajput.co
 
 Use GitHub's private vulnerability reporting:
 
-[https://github.com/nixrajput/mcp-vitest-docs/security/advisories/new](https://github.com/nixrajput/mcp-vitest-docs/security/advisories/new)
+[https://github.com/nixrajput/ai-sdk-threads-docs/security/advisories/new](https://github.com/nixrajput/ai-sdk-threads-docs/security/advisories/new)
 
 ### Option 2 - Email
 

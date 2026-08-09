@@ -16,13 +16,13 @@ export function Hero({ lang }: { lang: string }) {
       <div className="flex gap-3">
         <Link
           href={`/${lang}/docs`}
-          className="bg-fd-primary text-fd-primary-foreground rounded-lg px-6 py-3 font-medium shadow-sm transition-all duration-200 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--era-now) active:scale-[0.97]"
+          className="bg-fd-primary text-fd-primary-foreground rounded-lg px-6 py-3 font-medium shadow-sm transition-all duration-200 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--live) active:scale-[0.97]"
         >
           Get started
         </Link>
         <Link
           href={`/${lang}/docs/api/chat-handler`}
-          className="border-fd-border bg-fd-card hover:bg-fd-accent hover:border-fd-ring rounded-lg border px-6 py-3 font-medium transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--era-now) active:scale-[0.97]"
+          className="border-fd-border bg-fd-card hover:bg-fd-accent hover:border-fd-ring rounded-lg border px-6 py-3 font-medium transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--live) active:scale-[0.97]"
         >
           API reference
         </Link>
