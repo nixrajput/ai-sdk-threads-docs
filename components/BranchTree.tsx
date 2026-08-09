@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 // Field names match StoredMessage so the shape on screen is the shape in the table.
 // This is an illustration, not a live database - the playground runs the real store.
@@ -85,7 +86,11 @@ export function BranchTree() {
         An illustration of the stored shape. The buttons are{" "}
         <code className="font-mono">siblingsOf</code> plus{" "}
         <code className="font-mono">setActiveLeaf</code>; nothing in the ecosystem persists this
-        tree.
+        tree.{" "}
+        <Link href="/en/playground" className="underline hover:text-(--live)">
+          Run it against a real database
+        </Link>{" "}
+        in your browser.
       </p>
     </section>
   );

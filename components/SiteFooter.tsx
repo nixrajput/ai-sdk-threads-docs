@@ -51,6 +51,11 @@ export function SiteFooter({ lang }: { lang: string }) {
                 Migrating
               </Link>
             </li>
+            <li>
+              <Link href={`/${lang}/playground`} className={LINK}>
+                Playground
+              </Link>
+            </li>
           </ul>
         </div>
 

@@ -19,9 +19,10 @@ const BUDGETS = [
   // The marketing page and the docs are the pages that must stay light.
   { path: "/en", js: 800, ttfb: 800 },
   { path: "/en/docs", js: 850, ttfb: 800 },
-  // The playground downloads a database on purpose. Its budget covers the shell only:
-  // PGlite is fetched after mount, so it must not appear in the initial payload.
-  { path: "/en/playground", js: 700, ttfb: 800 },
+  // The playground carries the same shell as the home page since it joined the (home)
+  // group for its nav, hence the same budget. PGlite is fetched after mount, so the real
+  // guard is the pglite-absence assertion below, not this number.
+  { path: "/en/playground", js: 800, ttfb: 800 },
 ];
 
 // Whatever is on the port is not necessarily this site, and not necessarily a production
