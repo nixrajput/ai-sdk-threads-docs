@@ -78,19 +78,23 @@ Open http://localhost:3000. The root redirects to `/en`.
 ## Project structure
 
 ```
-app/[lang]/...    route segments (i18n-aware; [lang] currently resolves to "en")
-content/docs/en/  MDX documentation source
-components/       site chrome and homepage components
-lib/source.ts     Fumadocs content source adapter
-lib/i18n.ts       i18n config (locales, default locale)
-lib/shared.ts     shared site constants (URLs, copy, developer info)
-proxy.ts          i18n routing plus the non-localized route allowlist
+app/[lang]/...       route segments (i18n-aware; [lang] currently resolves to "en")
+app/[lang]/playground  the PGlite demo route
+content/docs/en/     MDX documentation source
+components/          site chrome and homepage components
+lib/source.ts        Fumadocs content source adapter
+lib/i18n.ts          i18n config (locales, default locale)
+lib/shared.ts        shared site constants (URLs, copy, developer info)
+lib/playground-ddl.ts  the demo's CREATE TABLE statements
+scripts/             the three checks plus the PGlite asset copy
+proxy.ts             i18n routing plus the non-localized route allowlist
 ```
 
-Two structural details that are easy to trip over:
+Three structural details that are easy to trip over:
 
 - **`app/[lang]/layout.tsx` is the root layout, and there is no `app/layout.tsx`.** That is what makes `<html lang>` dynamic, and it works only because nothing outside `[lang]` is a page.
-- **A new top-level route must be added to `NON_LOCALIZED_ROUTES` in `proxy.ts`.** Otherwise the i18n proxy rewrites it into `/en/...`, which 404s - and because that happens at the redirect step, the response still reports 200, so nothing looks broken. `npm run check:routes` asserts every such route serves 200 under `redirect: "manual"`, which is the guard that catches it.
+- **A new top-level route must be added to `NON_LOCALIZED_ROUTES` in `proxy.ts`.** Otherwise the i18n proxy rewrites it into `/en/...`, which 404s - and because that happens at the redirect step, the response still reports 200, so nothing looks broken. `npm run check:routes` asserts every such route serves 200 under `redirect: "manual"`, which is the guard that catches it. This has caught out both sites repeatedly, most recently on `/pglite`.
+- **The playground loads PGlite from `/pglite` at runtime, not through the bundler.** Turbopack rewrites its Emscripten glue into something that throws `m.instantiateWasm is not a function`, so `scripts/copy-pglite.mjs` copies the dist into `public/pglite` on `prebuild`/`predev` and the component imports it through a variable specifier no bundler can analyse. Those assets are gitignored, so a fresh clone needs one `npm run build` or `npm run dev` before the demo works.
 
 ## The checks a PR must pass
 
@@ -101,8 +105,9 @@ npm run lint          # eslint
 npm run types:check   # next typegen + tsc --noEmit
 npm run check:samples # extract + typecheck docs code samples
 npm run format:check  # prettier --check
-npm run build         # next build
+npm run build         # next build (prebuild copies the PGlite assets)
 npm run check:routes  # end-to-end route check, against `npm start`
+npm run check:vitals  # per-route payload and response-time budgets
 ```
 
 `npm run format` rewrites formatting if `format:check` complains. No version bump is required - this site is not versioned or published.

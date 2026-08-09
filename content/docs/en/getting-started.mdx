@@ -1,0 +1,109 @@
+---
+title: Getting started
+description: Install, add the two tables to your schema, and get a persisted useChat conversation running.
+---
+
+## Prerequisites
+
+- Node.js `>=20`
+- A Postgres database and a drizzle instance pointed at it, or [SQLite](/en/docs/api/sqlite)
+- `ai` `>=6 <8`. CI runs the whole suite against both `7.0.x` and the `6.x` floor.
+
+## Install
+
+```bash
+npm install ai-sdk-threads drizzle-orm
+```
+
+`ai-threads` and `ai-sdk-persistence` on npm are name reservations only - they contain no code and are not maintained. Install `ai-sdk-threads`.
+
+## Add the tables to your schema
+
+The two tables are plain drizzle `pgTable` objects. Re-export them from your schema file so your existing migration tooling picks them up:
+
+```ts
+// db/schema.ts
+export { messages, threads } from "ai-sdk-threads/drizzle";
+```
+
+Then generate and run a migration the way you already do, for example with drizzle-kit:
+
+```bash
+npx drizzle-kit generate
+npx drizzle-kit migrate
+```
+
+This creates `ai_sdk_threads` and `ai_sdk_messages`. The `ai_sdk_` prefix keeps them from colliding with your application tables. The full column list is in [Schema](/en/docs/api/schema).
+
+## Create the store once
+
+```ts
+// lib/threads.ts
+import { createThreadStore } from "ai-sdk-threads/drizzle";
+import { db } from "./db";
+
+export const store = createThreadStore(db);
+```
+
+## The chat route
+
+Your whole route is the handler. It loads the thread, stores the incoming message before streaming, streams the answer, and stores the reply with a server-generated id:
+
+```ts
+// app/api/chat/route.ts
+import { openai } from "@ai-sdk/openai";
+import { streamText } from "ai";
+import { chatHandler } from "ai-sdk-threads/handler";
+import { store } from "@/lib/threads";
+
+export const POST = chatHandler({
+  store,
+  execute: ({ modelMessages }) => streamText({ model: openai("gpt-5"), messages: modelMessages }),
+});
+```
+
+That route is missing one thing before production: **authorization**. Thread ids come from the client, so without an `authorize` callback any caller who guesses an id can read that conversation. See [Securing a thread](/en/docs/api/chat-handler#securing-a-thread) before you deploy.
+
+## Load the history
+
+Read the thread on the server and hand it straight to `useChat`:
+
+```tsx
+// app/chat/[id]/page.tsx
+import { store } from "@/lib/threads";
+import { Chat } from "./chat";
+
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const messages = await store.loadMessages(id);
+  return <Chat id={id} initialMessages={messages} />;
+}
+```
+
+```tsx
+// app/chat/[id]/chat.tsx
+"use client";
+import { useChat } from "@ai-sdk/react";
+import type { UIMessage } from "ai";
+
+export function Chat({ id, initialMessages }: { id: string; initialMessages: UIMessage[] }) {
+  const { messages, sendMessage } = useChat({ id, messages: initialMessages });
+  return <>{/* your UI */}</>;
+}
+```
+
+`loadMessages` returns the messages already validated by the SDK's own `validateUIMessages`, so a row that no longer matches the SDK's shape fails here rather than inside your renderer.
+
+## Create a thread before the first message
+
+```ts fragment
+const thread = await store.createThread({ userId: "user_123", title: "New chat" });
+// redirect(`/chat/${thread.id}`)
+```
+
+## Where to go next
+
+- [`chatHandler`](/en/docs/api/chat-handler) - every option, and what the handler does in order
+- [Securing a thread](/en/docs/api/chat-handler#securing-a-thread) - the one thing not to skip
+- [Branching](/en/docs/api/branching) - regenerate and edit-fork, which work with no extra code
+- [`resumableChat`](/en/docs/api/resumable-chat) - survive a reload mid-answer

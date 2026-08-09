@@ -1,7 +1,6 @@
-// A thread of messages where one reply branches off, the same shape as app/icon.svg.
-// Drawn from the palette rather than hex so the nav mark follows the theme, and violet
-// stays the live path everywhere. No ground tile here, unlike the favicon: in the nav
-// the mark sits on the page background and a filled tile reads as a second surface.
+// A thread where one reply branches off, same shape as app/icon.svg. Palette rather than
+// hex so it follows the theme. No ground tile, unlike the favicon: in the nav the mark sits
+// on the page background, where a filled tile reads as a second surface.
 export function Mark({ size = 20 }: { size?: number }) {
   return (
     <svg

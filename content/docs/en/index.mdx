@@ -1,6 +1,41 @@
 ---
 title: Introduction
-description: Chat thread and message persistence for the Vercel AI SDK.
+description: Chat thread and message persistence for the Vercel AI SDK - UIMessage-native, with branching and resumable streams, in your own database.
 ---
 
-Placeholder page so the build has a page tree. Real content lands in Tasks 5 and 6.
+The AI SDK gives you `useChat` and a streaming route. It does not give you anywhere to put the conversation. Every project ends up writing the same two tables, the same append-on-finish hook, and the same load-on-mount query - and usually flattens `UIMessage.parts` into a `content` string on the way in, which quietly loses tool calls, reasoning, and files.
+
+ai-sdk-threads is those two tables and a small typed store over them. Message `parts` go into `jsonb` exactly as the SDK produced them, so what comes back out is what `useChat` rendered - tool invocations and their outputs included. It is your database and your rows; this package owns no service and phones nothing home.
+
+## Why it exists
+
+The stored message shape is the part of an AI SDK app most exposed to the SDK's release cadence. Vercel's own `ai-chatbot` template carries a `Message_v2` table because migrating the original one in place was not practical. Every message row here records the `ai` major that wrote it in `sdk_version`, which is what turns an upgrade into something checkable rather than hopeful.
+
+Two gaps in the SDK are filled directly:
+
+- **`ModelMessage` to `UIMessage`** conversion, which the SDK still does not ship as of `ai` 7 ([vercel/ai#7180](https://github.com/vercel/ai/issues/7180)). See [convertToUIMessages](/en/docs/api/convert).
+- **Branching storage.** The UI for regenerate and edit-fork exists in ai-elements; nothing in the ecosystem persists the tree behind it ([vercel/ai#2929](https://github.com/vercel/ai/issues/2929), open since 2024). See [Branching](/en/docs/api/branching).
+
+## What you get
+
+| | |
+| --- | --- |
+| [`chatHandler`](/en/docs/api/chat-handler) | One call replaces the load, store, stream, store boilerplate |
+| [`resumableChat`](/en/docs/api/resumable-chat) | The POST, GET and DELETE trio, so a reload mid-answer picks the stream back up |
+| [Branching](/en/docs/api/branching) | Edit or regenerate and the old version survives as a sibling |
+| [The store](/en/docs/api/store) | Threads and messages over Postgres, with keyset pagination |
+| [SQLite](/en/docs/api/sqlite) | The same contract, verified by a parity suite against both |
+| [Migrating](/en/docs/migrating) | `sdk_version` on every row, plus a CLI that checks rather than assumes |
+
+Zero runtime dependencies: `ai`, `drizzle-orm` and `resumable-stream` are peers, the last two optional. The core carries no Node globals, enforced by a second typecheck in CI, so it runs on edge runtimes.
+
+## What it is not
+
+- **Not a chat UI.** ai-elements and assistant-ui own that; this stores what they render.
+- **Not an agent framework or a memory system.** No tool orchestration, no vector search, no summarisation.
+- **Not a hosted service.** There is no tier to upgrade to and no per-seat pricing. If you want a managed layer with sync and analytics, assistant-ui's cloud and Convex both do that well, and this is the self-hosted answer instead.
+- **Not for `ai` 4 or older.** `ai` 5 was a rewrite; the supported range is `>=6 <8`.
+
+## Next
+
+Start with [Getting started](/en/docs/getting-started) - two tables, a store, and a route handler.

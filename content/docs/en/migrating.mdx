@@ -1,0 +1,64 @@
+---
+title: Migrating between AI SDK versions
+description: Every row records the ai major that wrote it, which turns an SDK upgrade into something checkable rather than hopeful.
+---
+
+Every message row records the `ai` major that wrote it, in `sdk_version`. That is what makes an upgrade checkable rather than hopeful.
+
+## As it stands, there is nothing to convert
+
+Stored `UIMessage.parts` are the same shape in ai 5, 6 and 7 - **measured, not assumed**. Real payloads captured from `ai@5.0.228` and `ai@6.0.246` are byte-identical to v7's, and are accepted unchanged by v7's own validator.
+
+Those payloads are committed as test fixtures in the package, so if a future major does change the format, the test suite says so rather than a user discovering it.
+
+This is worth stating plainly because the opposite is widely assumed. The AI SDK does break things between majors - but for *stored* `UIMessage.parts` across 5, 6 and 7, it has not.
+
+## Two ways to handle it when that day comes
+
+### Lazily, in your app
+
+`migrateParts` brings one message's parts up to the current major. Call it on read and you never need a migration step at all. Today it is a pass-through; when a future major diverges, the transform lands inside it with no change to your code:
+
+```ts
+import { migrateParts } from "ai-sdk-threads";
+
+declare const row: { parts: unknown[]; sdkVersion: 5 | 6 | 7 };
+
+const parts = migrateParts(row.parts, row.sdkVersion);
+```
+
+### In bulk, with the CLI
+
+`migrate` walks every row stamped with an older major, checks the current SDK can still read it, and restamps it:
+
+```bash
+npx ai-sdk-threads migrate --database-url "$DATABASE_URL" --dry-run
+npx ai-sdk-threads migrate --database-url "$DATABASE_URL"
+```
+
+It reports per-major counts and, importantly, **lists any row the current SDK cannot read instead of restamping it as though it were fine**. `--dry-run` writes nothing. The whole pass is one transaction.
+
+The CLI needs a Postgres driver of its own - `npm i -D pg` - because this package ships none.
+
+## If you are on ai 6
+
+Tell the store, or rows get stamped with the wrong major:
+
+```ts
+// lib/threads.ts
+import { createThreadStore } from "ai-sdk-threads/drizzle";
+import { db } from "./db";
+
+export const store = createThreadStore(db, { sdkVersion: 6 });
+```
+
+## Supported versions
+
+| | |
+| --- | --- |
+| `ai` | `>=6 <8`. CI runs the whole suite against both `7.0.x` and the `6.x` floor. |
+| `drizzle-orm` | `^0.45` for the `./drizzle` and `./sqlite` adapters (optional peer) |
+| `resumable-stream` | `^2.2` for the `./resume` module (optional peer) |
+| Node.js | `>=20` |
+| Database | Postgres, or SQLite via [`./sqlite`](/en/docs/api/sqlite) |
+| Module format | ESM only, no CJS build |

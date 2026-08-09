@@ -2,18 +2,33 @@ import { mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync }
 import { join } from "node:path";
 
 const OUT = ".samples";
-const FENCE = /```ts(?![a-z])(?<meta>[^\n]*)\n(?<code>[\s\S]*?)```/g;
+const FENCE = /```(?<lang>tsx?)(?![a-z])(?<meta>[^\n]*)\n(?<code>[\s\S]*?)```/g;
 
-// Fragments are short snippets that assume a live db and store rather than
-// repeating that setup on every page. They only typecheck inside this preamble.
-const PREAMBLE = `import { convertToUIMessages, orderPath } from "ai-sdk-threads";
-import { createThreadStore, messages, threads } from "ai-sdk-threads/drizzle";
-import { chatHandler } from "ai-sdk-threads/handler";
-import { resumableChat } from "ai-sdk-threads/resume";
-import { streamText, type ModelMessage, type UIMessage } from "ai";
+// Docs samples import `store` from "@/lib/threads" because that is what a reader's own
+// code looks like. tsconfig.samples.json maps that specifier at these two stubs, so the
+// samples typecheck as written instead of carrying an import path nobody would use.
+const DB_STUB = `import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 
-declare const db: import("drizzle-orm/node-postgres").NodePgDatabase;
-declare const store: ReturnType<typeof createThreadStore>;
+export declare const db: NodePgDatabase;
+`;
+
+const THREADS_STUB = `import { createThreadStore } from "ai-sdk-threads/drizzle";
+import { db } from "./db";
+
+export const store = createThreadStore(db);
+`;
+
+// The getting-started page shows a server page importing its own client component, so
+// that sibling module has to exist for the sample to resolve.
+const CHAT_STUB = `import type { UIMessage } from "ai";
+
+export declare function Chat(props: { id: string; initialMessages: UIMessage[] }): React.JSX.Element;
+`;
+
+// Fragments are snippets that assume a store and a thread rather than repeating that
+// setup on every page. They only typecheck inside this wrapper.
+const PREAMBLE = `import { store } from "@/lib/threads";
+
 declare const threadId: string;
 declare const messageId: string;
 
@@ -30,7 +45,12 @@ function walk(dir: string): string[] {
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 
-// Samples use top-level await, valid only in ESM; nodenext infers CJS without this.
+writeFileSync(join(OUT, "db.ts"), DB_STUB);
+writeFileSync(join(OUT, "threads.ts"), THREADS_STUB);
+writeFileSync(join(OUT, "chat.tsx"), CHAT_STUB);
+
+// Samples use top-level await, which is only valid in a module; without this the
+// directory has no package type and the files are treated as scripts.
 writeFileSync(join(OUT, "package.json"), `{ "type": "module" }\n`);
 
 let count = 0;
@@ -42,7 +62,10 @@ for (const file of walk("content/docs")) {
     if (meta.includes("notype")) continue;
     const code = match.groups?.code ?? "";
     const body = meta.includes("fragment") ? `${PREAMBLE}${code}\n}\n` : code;
-    const name = `${file.replace(/[^a-z0-9]/gi, "_")}_${count++}.ts`;
+    // The fence language decides the extension. Sniffing the body for "</" misses
+    // self-closing JSX, which then fails to parse as .ts.
+    const ext = match.groups?.lang === "tsx" ? "tsx" : "ts";
+    const name = `${file.replace(/[^a-z0-9]/gi, "_")}_${count++}.${ext}`;
     writeFileSync(join(OUT, name), body);
   }
 }

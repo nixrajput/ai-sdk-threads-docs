@@ -19,18 +19,22 @@ This repo is the documentation site for the **ai-sdk-threads** npm package, depl
 
 ```
 app/[lang]/...        route segments (i18n-aware; [lang] currently resolves to "en")
+app/[lang]/playground the PGlite demo route
 content/docs/en/      MDX documentation source
 lib/source.ts         Fumadocs content source adapter
 lib/shared.ts         site constants (URL, tagline, repo and npm links, install command)
 lib/layout.shared.tsx nav options shared by the home and docs layouts
 lib/i18n.ts           i18n config (locales, default locale)
+lib/playground-ddl.ts the demo's CREATE TABLE statements
+scripts/              the three checks plus the PGlite asset copy
 proxy.ts              i18n routing plus the non-localized route allowlist
 ```
 
-### Two things that will bite you
+### Three things that will bite you
 
 1. **`app/[lang]/layout.tsx` is the root layout. There is no `app/layout.tsx`.** That is what makes `<html lang>` dynamic, and it is legal only because nothing outside `[lang]` is a page. Do not add one.
-2. **A new top-level route must be added to `NON_LOCALIZED_ROUTES` in `proxy.ts`.** Otherwise the i18n proxy rewrites it into `/en/...`, which 404s - and the redirect step still reports 200, so nothing looks wrong. This has already cost five debugging sessions across the two sites. `npm run check:routes` asserts every such route serves 200 under `redirect: "manual"`, which is the guard that catches it.
+2. **The playground loads PGlite from `/pglite` at runtime, not through the bundler.** Turbopack rewrites its Emscripten glue into something that throws `m.instantiateWasm is not a function`, so `scripts/copy-pglite.mjs` copies the dist into `public/pglite` on `prebuild`/`predev`, and `components/Playground.tsx` imports it through a variable specifier no bundler can statically analyse. Do not "fix" that indirection back into a normal import.
+3. **A new top-level route must be added to `NON_LOCALIZED_ROUTES` in `proxy.ts`.** Otherwise the i18n proxy rewrites it into `/en/...`, which 404s - and the redirect step still reports 200, so nothing looks wrong. This has already cost six debugging sessions across the two sites, most recently on `/pglite`. `npm run check:routes` asserts every such route serves 200 under `redirect: "manual"`, which is the guard that catches it.
 
 ### Commands
 
@@ -43,6 +47,8 @@ The gate, run by CI and `.githooks/pre-push`:
 ```bash
 npm run lint && npm run types:check && npm run check:samples && npm run format:check && npm run build
 ```
+
+Plus two checks that need a running server (`npm start`, then `BASE_URL=... npm run check:routes` and `npm run check:vitals`). CI runs both against one server rather than starting `next start` twice.
 
 ### Conventions
 

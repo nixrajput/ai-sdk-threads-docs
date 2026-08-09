@@ -1,4 +1,6 @@
 import { Hero } from "@/components/Hero";
+import { BoilerplateContrast } from "@/components/BoilerplateContrast";
+import { BranchTree } from "@/components/BranchTree";
 import { FeatureGrid } from "@/components/FeatureGrid";
 import { InstallCommand } from "@/components/InstallCommand";
 import { Reveal } from "@/components/Reveal";
@@ -10,6 +12,12 @@ export default async function HomePage(props: PageProps<"/[lang]">) {
   return (
     <main>
       <Hero lang={lang} />
+      <Reveal>
+        <BoilerplateContrast />
+      </Reveal>
+      <Reveal>
+        <BranchTree />
+      </Reveal>
       <Reveal>
         <FeatureGrid />
       </Reveal>

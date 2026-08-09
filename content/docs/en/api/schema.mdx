@@ -1,0 +1,53 @@
+---
+title: Schema
+description: The two tables, every column, and why the timestamps are millisecond precision.
+---
+
+```ts
+import { messages, threads } from "ai-sdk-threads/drizzle";
+```
+
+They are plain drizzle objects, so they land in your own schema and migration history. The `ai_sdk_` prefix keeps them from colliding with your application tables.
+
+## `ai_sdk_threads`
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | `text` PK | |
+| `user_id` | `text` | Indexed. Nullable for anonymous chats. |
+| `title` | `text` | |
+| `visibility` | `text` | `'private'` (default) or `'public'`. |
+| `active_leaf_id` | `text` | The last message on the live path. |
+| `active_stream_id` | `text` | Set while a reply streams; [`resumableChat`](/en/docs/api/resumable-chat) resumes from it. |
+| `metadata` | `jsonb` | Yours to use. |
+| `created_at` | `timestamptz(3)` | Millisecond precision on purpose - see below. |
+| `updated_at` | `timestamptz(3)` | Moved by `appendMessages` and `updateThread`. |
+
+## `ai_sdk_messages`
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | `text` PK | The `UIMessage` id. |
+| `thread_id` | `text` | Indexed, `ON DELETE CASCADE`. |
+| `parent_id` | `text` | The message this one answers. |
+| `role` | `text` | `'system'`, `'user'`, or `'assistant'`. |
+| `parts` | `jsonb` | `UIMessage.parts`, verbatim. |
+| `metadata` | `jsonb` | `UIMessage.metadata`, verbatim. |
+| `sdk_version` | `smallint` | The `ai` major that wrote the row. |
+| `created_at` | `timestamptz(3)` | |
+
+## Why millisecond precision
+
+The timestamp columns are **millisecond** precision, not Postgres' microsecond default.
+
+`listThreads`' cursor carries `created_at` through a JavaScript `Date`, which cannot represent microseconds. At the default precision the cursor rounds down and the following page silently skips every row sharing that millisecond - so a list of six threads paged to exhaustion could return three, with no error anywhere.
+
+Keep the precision if you hand-write the migration.
+
+## Messages form a tree
+
+Each message row points at its parent, so the messages of a thread form a tree rather than a flat list, and the thread's `active_leaf_id` marks which path through that tree is the live conversation. `loadMessages` returns exactly that path.
+
+A thread is genuinely a tree once anything has been edited or regenerated. If you query the tables directly, walk `parent_id` from `active_leaf_id` - or call [`orderPath`](/en/docs/api/store#orderpathrows-activeleafid) - rather than sorting by `created_at`. A plain sort interleaves branches that were never part of the same conversation.
+
+`sdk_version` records which `ai` major wrote each row. Nothing reads it yet; it is there so a future SDK major can migrate stored parts instead of guessing what shape they are in. See [Migrating](/en/docs/migrating).

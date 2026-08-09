@@ -3,7 +3,9 @@
   "private": true,
   "license": "MIT",
   "scripts": {
+    "prebuild": "node scripts/copy-pglite.mjs",
     "build": "next build",
+    "predev": "node scripts/copy-pglite.mjs",
     "dev": "next dev",
     "start": "next start",
     "lint": "eslint",
@@ -11,7 +13,8 @@
     "format": "prettier --write \"{app,components,lib,scripts}/**/*.{ts,tsx,css}\"",
     "format:check": "prettier --check \"{app,components,lib,scripts}/**/*.{ts,tsx,css}\"",
     "check:samples": "tsx scripts/check-samples.ts && tsc -p tsconfig.samples.json",
-    "check:routes": "node scripts/check-routes.mjs"
+    "check:routes": "node scripts/check-routes.mjs",
+    "check:vitals": "node scripts/check-vitals.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.4",
@@ -27,6 +30,9 @@
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
+    "@ai-sdk/openai": "^4.0.36",
+    "@ai-sdk/react": "^4.0.61",
+    "@libsql/client": "^0.17.4",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/mdx": "^2.0.14",
     "@types/node": "^26.1.2",
