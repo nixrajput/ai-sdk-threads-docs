@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { InstallCommand } from "./InstallCommand";
-import { SITE_DESCRIPTION, SITE_TAGLINE } from "@/lib/shared";
+import { NPM_URL, SITE_DESCRIPTION, SITE_TAGLINE } from "@/lib/shared";
+import { latestVersion } from "@/lib/version";
 
-export function Hero({ lang }: { lang: string }) {
+export async function Hero({ lang }: { lang: string }) {
+  const version = await latestVersion();
+
   return (
     <section className="relative isolate mx-auto flex max-w-3xl flex-col items-center gap-6 px-4 py-12 text-center sm:py-14">
       <div className="flex flex-col items-center gap-4">
@@ -14,7 +17,18 @@ export function Hero({ lang }: { lang: string }) {
 
       <div aria-hidden className="hero-rule" />
 
-      <InstallCommand />
+      <div className="flex flex-col items-center gap-2">
+        <InstallCommand />
+        {version ? (
+          <a
+            href={NPM_URL}
+            className="text-fd-muted-foreground hover:text-fd-foreground rounded-sm font-mono text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--live)"
+          >
+            v{version} on npm
+          </a>
+        ) : null}
+      </div>
+
       <div className="flex gap-3">
         <Link
           href={`/${lang}/docs`}
