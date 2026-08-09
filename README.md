@@ -22,17 +22,17 @@ Open http://localhost:3000. The root redirects to `/en`.
 
 ## Scripts
 
-| Script                  | What it does                                                              |
-| ----------------------- | ------------------------------------------------------------------------- |
-| `npm run dev`           | Dev server                                                                |
-| `npm run build`         | Production build; fails on broken MDX and bad internal links              |
-| `npm start`             | Serve the production build, needed by `check:routes`                       |
-| `npm run lint`          | ESLint                                                                    |
-| `npm run types:check`   | `next typegen` then `tsc --noEmit`                                        |
-| `npm run check:samples` | Extracts every docs code fence and typechecks it against the npm package  |
-| `npm run check:routes`  | End-to-end route check against a running server                           |
-| `npm run format`        | Prettier write                                                            |
-| `npm run format:check`  | Prettier check, part of the gate                                          |
+| Script                  | What it does                                                             |
+| ----------------------- | ------------------------------------------------------------------------ |
+| `npm run dev`           | Dev server                                                               |
+| `npm run build`         | Production build; fails on broken MDX and bad internal links             |
+| `npm start`             | Serve the production build, needed by `check:routes`                     |
+| `npm run lint`          | ESLint                                                                   |
+| `npm run types:check`   | `next typegen` then `tsc --noEmit`                                       |
+| `npm run check:samples` | Extracts every docs code fence and typechecks it against the npm package |
+| `npm run check:routes`  | End-to-end route check against a running server                          |
+| `npm run format`        | Prettier write                                                           |
+| `npm run format:check`  | Prettier check, part of the gate                                         |
 
 The full gate, which CI and `.githooks/pre-push` both run:
 
@@ -56,7 +56,7 @@ npm run lint && npm run types:check && npm run check:samples && npm run format:c
 
 ## Code samples are typechecked
 
-`npm run check:samples` extracts every `ts` and `tsx` fence from `content/docs/**` and typechecks it against `ai-sdk-threads` **installed from npm**, not a local build. A sample that stops compiling fails the build, so the docs prove the *shipped* package behaves as documented. Two fence flags:
+`npm run check:samples` extracts every `ts` and `tsx` fence from `content/docs/**` and typechecks it against `ai-sdk-threads` **installed from npm**, not a local build. A sample that stops compiling fails the build, so the docs prove the _shipped_ package behaves as documented. Two fence flags:
 
 - `notype` - opts a fence out, for prose illustrations and raw SQL.
 - `fragment` - wraps the fence in a preamble that declares an ambient `db`, `store`, `threadId` and `messageId`, so short snippets need no setup boilerplate.
