@@ -5,7 +5,7 @@ description: The ModelMessage to UIMessage direction the AI SDK still does not s
 
 The AI SDK converts `UIMessage[]` to `ModelMessage[]`. As of `ai` 7 it does not ship the reverse, which is what you need when the messages you have came from a provider, a log, or an older table ([vercel/ai#7180](https://github.com/vercel/ai/issues/7180), open at the time of writing - if the SDK ships it, prefer theirs).
 
-This is a pure function. It needs no store and no database.
+This is a pure function. It needs no store and no database - the [playground](/en/playground) has a panel that runs it on whatever you paste in.
 
 ```ts
 import { convertToUIMessages } from "ai-sdk-threads";

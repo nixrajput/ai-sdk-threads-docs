@@ -7,9 +7,13 @@ import { drizzle } from "drizzle-orm/pglite";
 import { createThreadStore } from "ai-sdk-threads/drizzle";
 import type { UIMessage } from "ai";
 import { PLAYGROUND_DDL } from "@/lib/playground-ddl";
+import { CallLog, type Call } from "./playground/CallLog";
+import { ConvertPanel } from "./playground/ConvertPanel";
+import { RowsPanel, ROWS_SQL, type RawRow } from "./playground/RowsPanel";
+import { ThreadsPanel } from "./playground/ThreadsPanel";
+import { TreeView, type TreeRow } from "./playground/TreeView";
 
 type Store = ReturnType<typeof createThreadStore>;
-type Row = Awaited<ReturnType<Store["getTree"]>>[number];
 
 const THREAD_ID = "demo";
 
@@ -22,13 +26,11 @@ const DB_NAME = "idb://ai-sdk-threads-demo-v1";
 // anything caller-supplied reaching it would be script execution on our own origin.
 const PGLITE_ENTRY = "/pglite/index.js";
 
+const TABS = ["Branching", "Rows", "Threads", "Convert"] as const;
+type Tab = (typeof TABS)[number];
+
 const msg = (id: string, role: "user" | "assistant", text: string): UIMessage =>
   ({ id, role, parts: [{ type: "text", text }] }) as UIMessage;
-
-const textOf = (row: Row) => {
-  const parts = row.parts as { type: string; text?: string }[];
-  return parts.map((p) => (p.type === "text" ? p.text : `[${p.type}]`)).join(" ");
-};
 
 // Loaded from our origin at runtime, not bundled: Turbopack rewrites PGlite's Emscripten
 // glue into "m.instantiateWasm is not a function", and prebuilt WebAssembly.Modules do not
@@ -38,7 +40,7 @@ async function loadPGlite(): Promise<typeof PGlite> {
   return mod.PGlite;
 }
 
-async function boot(): Promise<Store> {
+async function boot(): Promise<{ store: Store; client: PGlite }> {
   const PGliteCtor = await loadPGlite();
   const client = new PGliteCtor(DB_NAME);
   await client.exec(PLAYGROUND_DDL);
@@ -53,7 +55,7 @@ async function boot(): Promise<Store> {
   if (loaded.length !== 1) throw new Error("schema probe returned the wrong row count");
   await store.deleteThread(probe.id);
 
-  return store;
+  return { store, client };
 }
 
 async function seed(store: Store) {
@@ -66,29 +68,40 @@ async function seed(store: Store) {
 }
 
 export function Playground() {
-  // State rather than a ref: the store is only ever read inside event handlers, and a
-  // ref read from one trips react-hooks/refs.
   const [store, setStore] = useState<Store | null>(null);
+  const [client, setClient] = useState<PGlite | null>(null);
   const [state, setState] = useState<"booting" | "ready" | "failed">("booting");
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState("");
+  const [tab, setTab] = useState<Tab>("Branching");
   const [path, setPath] = useState<UIMessage[]>([]);
-  const [tree, setTree] = useState<Row[]>([]);
+  const [tree, setTree] = useState<TreeRow[]>([]);
+  const [rows, setRows] = useState<RawRow[]>([]);
+  const [calls, setCalls] = useState<Call[]>([]);
   const [busy, setBusy] = useState(false);
 
-  const refresh = useCallback(async (s: Store) => {
-    setPath(await s.loadMessages(THREAD_ID));
-    setTree(await s.getTree(THREAD_ID));
+  const record = useCallback((code: string, result: string) => {
+    setCalls((prev) => [{ code, result }, ...prev].slice(0, 8));
+  }, []);
+
+  const refresh = useCallback(async (s: Store, c: PGlite) => {
+    const live = await s.loadMessages(THREAD_ID);
+    const all = await s.getTree(THREAD_ID);
+    const raw = await c.query<RawRow>(ROWS_SQL, [THREAD_ID]);
+    setPath(live);
+    setTree(all as TreeRow[]);
+    setRows(raw.rows);
   }, []);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const s = await boot();
-        await seed(s);
+        const booted = await boot();
+        await seed(booted.store);
         if (cancelled) return;
-        await refresh(s);
-        setStore(s);
+        await refresh(booted.store, booted.client);
+        setStore(booted.store);
+        setClient(booted.client);
         setState("ready");
       } catch (cause) {
         if (cancelled) return;
@@ -102,14 +115,13 @@ export function Playground() {
   }, [refresh]);
 
   const run = (fn: (s: Store) => Promise<void>) => async () => {
-    if (!store || busy) return;
+    if (!store || !client || busy) return;
     setBusy(true);
     try {
       await fn(store);
-      await refresh(store);
+      await refresh(store, client);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause));
-      setState("failed");
+      record("// threw", cause instanceof Error ? cause.message : String(cause));
     } finally {
       setBusy(false);
     }
@@ -118,34 +130,58 @@ export function Playground() {
   const regenerate = run(async (s) => {
     const live = await s.loadMessages(THREAD_ID);
     const last = live.at(-1);
-    if (!last || last.role !== "assistant") return;
-    await s.regenerateFrom(THREAD_ID, last.id);
+    if (!last || last.role !== "assistant") {
+      record("// nothing to regenerate", "the live path does not end in an assistant message");
+      return;
+    }
+    const { leafId } = await s.regenerateFrom(THREAD_ID, last.id);
+    record(`await store.regenerateFrom(threadId, "${last.id}")`, `{ leafId: "${leafId}" }`);
+
     const variant = (await s.getTree(THREAD_ID)).filter((r) => r.role === "assistant").length + 1;
+    const id = `a${variant}`;
     await s.appendMessages(THREAD_ID, [
       msg(
-        `a${variant}`,
+        id,
         "assistant",
-        `Variant ${variant}: a backpack of variables the function carries wherever it goes.`,
+        `Variant ${variant}: a backpack of variables it carries wherever it goes.`,
       ),
     ]);
+    record(
+      `await store.appendMessages(threadId, [{ id: "${id}", role: "assistant", ... }])`,
+      `stored 1 message, parentId: "${leafId}"`,
+    );
   });
 
   const editFirst = run(async (s) => {
-    await s.replaceMessage(THREAD_ID, "m1", msg("m1", "user", "Explain closures with a metaphor."));
+    const updated = await s.replaceMessage(
+      THREAD_ID,
+      "m1",
+      msg("m1", "user", "Explain closures with a metaphor."),
+    );
+    record(
+      `await store.replaceMessage(threadId, "m1", { ...edited })`,
+      `kept id "${updated.id}"; the previous wording is now a sibling under a surrogate id`,
+    );
   });
 
-  const switchBranch = run(async (s) => {
-    const live = await s.loadMessages(THREAD_ID);
-    const last = live.at(-1);
-    if (!last) return;
-    const { siblings, index } = await s.siblingsOf(THREAD_ID, last.id);
-    const next = siblings[(index + 1) % siblings.length];
-    if (next) await s.setActiveLeaf(THREAD_ID, next.id);
-  });
+  const select = async (id: string) => {
+    if (!store || !client || busy) return;
+    setBusy(true);
+    try {
+      await store.setActiveLeaf(THREAD_ID, id);
+      record(`await store.setActiveLeaf(threadId, "${id}")`, "the live path now ends here");
+      await refresh(store, client);
+    } catch (cause) {
+      record("// threw", cause instanceof Error ? cause.message : String(cause));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const reset = run(async (s) => {
     await s.deleteThread(THREAD_ID);
     await seed(s);
+    record(`await store.deleteThread(threadId)`, "messages cascaded; thread reseeded");
   });
 
   if (state === "booting") {
@@ -177,49 +213,83 @@ export function Playground() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        <Action onClick={regenerate} busy={busy} label="Regenerate" />
-        <Action onClick={switchBranch} busy={busy} label="Switch variant" />
-        <Action onClick={editFirst} busy={busy} label="Edit the question" />
-        <Action onClick={reset} busy={busy} label="Reset" />
+    <div className="space-y-6">
+      <div className="border-fd-border flex flex-wrap gap-1 border-b">
+        {TABS.map((name) => (
+          <button
+            key={name}
+            type="button"
+            onClick={() => setTab(name)}
+            aria-current={tab === name}
+            className="-mb-px border-b-2 px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--live)"
+            style={{
+              borderColor: tab === name ? "var(--live)" : "transparent",
+              color: tab === name ? "var(--live)" : undefined,
+            }}
+          >
+            {name}
+          </button>
+        ))}
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
-        <div className="border-fd-border bg-fd-card rounded-lg border p-3">
-          <p className="text-fd-muted-foreground font-mono text-xs">loadMessages - the live path</p>
-          <ul className="mt-2 space-y-2">
-            {path.map((m) => (
-              <li key={m.id} className="flex items-start gap-2 text-sm">
-                <span
-                  className="w-16 shrink-0 font-mono text-xs"
-                  style={{ color: m.role === "assistant" ? "var(--live)" : undefined }}
-                >
-                  {m.role}
-                </span>
-                <span>{(m.parts as { text?: string }[]).map((p) => p.text).join(" ")}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+      {tab === "Branching" && (
+        <div className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            <Action onClick={regenerate} busy={busy} label="Regenerate" />
+            <Action onClick={editFirst} busy={busy} label="Edit the question" />
+            <Action onClick={reset} busy={busy} label="Reset" />
+          </div>
 
-        <div className="border-fd-border bg-fd-card rounded-lg border p-3">
-          <p className="text-fd-muted-foreground font-mono text-xs">
-            getTree - every row, {tree.length} total
-          </p>
-          <ul className="mt-2 space-y-1 font-mono text-xs">
-            {tree.map((r) => {
-              const live = path.some((m) => m.id === r.id);
-              return (
-                <li key={r.id} style={{ color: live ? "var(--live)" : "var(--muted)" }}>
-                  {r.id} parent={String(r.parentId)} {live ? "(live)" : "(sibling)"}{" "}
-                  {textOf(r).slice(0, 28)}
-                </li>
-              );
-            })}
-          </ul>
+          <div className="grid gap-3 md:grid-cols-2">
+            <Panel title={`getTree - ${tree.length} rows, click to switch`}>
+              <TreeView
+                rows={tree}
+                livePath={path.map((m) => m.id)}
+                onSelect={select}
+                busy={busy}
+              />
+            </Panel>
+
+            <Panel title="loadMessages - the live path">
+              <ul className="space-y-2">
+                {path.map((m) => (
+                  <li key={m.id} className="flex items-start gap-2 text-sm">
+                    <span
+                      className="w-16 shrink-0 font-mono text-xs"
+                      style={{ color: m.role === "assistant" ? "var(--live)" : undefined }}
+                    >
+                      {m.role}
+                    </span>
+                    <span>{(m.parts as { text?: string }[]).map((p) => p.text).join(" ")}</span>
+                  </li>
+                ))}
+              </ul>
+            </Panel>
+          </div>
         </div>
-      </div>
+      )}
+
+      {tab === "Rows" && (
+        <Panel title="ai_sdk_messages, straight from Postgres">
+          <RowsPanel rows={rows} />
+        </Panel>
+      )}
+
+      {tab === "Threads" && (
+        <Panel title="listThreads - keyset pagination">
+          {store && <ThreadsPanel store={store} onCall={record} />}
+        </Panel>
+      )}
+
+      {tab === "Convert" && (
+        <Panel title="convertToUIMessages">
+          <ConvertPanel />
+        </Panel>
+      )}
+
+      <Panel title="What just ran">
+        <CallLog calls={calls} />
+      </Panel>
 
       <p className="text-fd-muted-foreground text-xs">
         Real Postgres, compiled to WebAssembly, running in this tab - and the real published{" "}
@@ -228,6 +298,15 @@ export function Playground() {
         your tree.
       </p>
     </div>
+  );
+}
+
+function Panel({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="border-fd-border bg-fd-card rounded-lg border p-3">
+      <p className="text-fd-muted-foreground mb-3 font-mono text-xs">{title}</p>
+      {children}
+    </section>
   );
 }
 

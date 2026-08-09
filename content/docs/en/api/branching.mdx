@@ -7,6 +7,11 @@ Messages have always formed a tree here - `parentId` on every row, `activeLeafId
 
 The UI for this exists in ai-elements; the storage behind it does not exist anywhere else ([vercel/ai#2929](https://github.com/vercel/ai/issues/2929), open since 2024).
 
+<Callout>
+  Every method on this page runs in the [playground](/en/playground) against a real Postgres in
+  your browser, and shows the call it made plus the rows it produced.
+</Callout>
+
 ## The two common cases are automatic
 
 `chatHandler` wires these for you, from what the SDK client already sends:
