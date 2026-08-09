@@ -6,15 +6,7 @@ const base = process.env.BASE_URL ?? "http://localhost:3000";
 // Routes whose page does not exist yet. Listed rather than omitted so a shortened
 // check is visible in the output instead of reading as full coverage. Empty this
 // as the pages land; the run fails once it is empty and a route still 404s.
-const PENDING = new Set([
-  "/en/docs/getting-started",
-  "/en/docs/migrating",
-  "/en/docs/importing",
-  "/en/playground",
-  ...["chat-handler", "resumable-chat", "store", "branching", "convert", "sqlite", "schema"].map(
-    (s) => `/en/docs/api/${s}`,
-  ),
-]);
+const PENDING = new Set(["/en/playground"]);
 
 async function expectOk(path) {
   if (PENDING.has(path)) {

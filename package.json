@@ -27,6 +27,9 @@
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
+    "@ai-sdk/openai": "^4.0.36",
+    "@ai-sdk/react": "^4.0.61",
+    "@libsql/client": "^0.17.4",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/mdx": "^2.0.14",
     "@types/node": "^26.1.2",

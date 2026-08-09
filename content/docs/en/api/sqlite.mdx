@@ -1,0 +1,51 @@
+---
+title: SQLite
+description: The same ThreadStore contract over a drizzle SQLite database, plus the three constraints that are not optional.
+---
+
+The same contract, over a drizzle SQLite database on an **async** driver - libsql is what CI runs:
+
+```ts
+import { createThreadStore } from "ai-sdk-threads/sqlite";
+import { drizzle } from "drizzle-orm/libsql";
+import { createClient } from "@libsql/client";
+
+const client = createClient({ url: "file:local.db" });
+export const store = createThreadStore(drizzle(client));
+```
+
+```ts
+// db/schema.ts - the SQLite tables, same names and columns
+export { messages, threads } from "ai-sdk-threads/sqlite";
+```
+
+Every method behaves identically. A parity suite runs the whole contract against both adapters, so the two cannot drift.
+
+## Three things that will bite you
+
+### Do not use libsql's bare `:memory:`
+
+That database belongs to a single connection, and writes here run in a transaction which opens another - so it sees no tables at all. Use a file (`file:local.db`) or a remote libsql URL.
+
+This is the single most common way to get a confusing failure with this adapter: the schema appears to exist, and then every write reports that the table is missing.
+
+### Async drivers only
+
+Writes use interactive transactions with an async callback, which `better-sqlite3` rejects outright and Bun's driver does not await - and Cloudflare D1 has no interactive transactions at all. libsql, local file or remote, is the supported and tested driver.
+
+On a sync driver, atomicity would be silently lost rather than reported, which is why this is a hard requirement rather than a recommendation.
+
+### `PRAGMA foreign_keys = ON`
+
+SQLite defaults it **off**, per connection. Without it, deleting a thread will not delete its messages, and you are left with orphan rows that no query returns.
+
+```sql notype
+PRAGMA foreign_keys = ON;
+```
+
+## Two columns necessarily differ
+
+- `parts` and `metadata` are `text` with drizzle's `json` mode instead of `jsonb`.
+- Timestamps are integer milliseconds instead of `timestamptz(3)` - the same precision the keyset cursor needs.
+
+Everything else, including the tree columns and the indexes, matches [the Postgres schema](/en/docs/api/schema).

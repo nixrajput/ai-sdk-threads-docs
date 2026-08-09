@@ -1,0 +1,48 @@
+---
+title: convertToUIMessages
+description: The ModelMessage to UIMessage direction the AI SDK still does not ship.
+---
+
+The AI SDK converts `UIMessage[]` to `ModelMessage[]`. As of `ai` 7 it does not ship the reverse, which is what you need when the messages you have came from a provider, a log, or an older table ([vercel/ai#7180](https://github.com/vercel/ai/issues/7180), open at the time of writing - if the SDK ships it, prefer theirs).
+
+This is a pure function. It needs no store and no database.
+
+```ts
+import { convertToUIMessages } from "ai-sdk-threads";
+
+const uiMessages = convertToUIMessages([
+  { role: "user", content: "weather?" },
+  {
+    role: "assistant",
+    content: [
+      { type: "tool-call", toolCallId: "c1", toolName: "getWeather", input: { city: "x" } },
+    ],
+  },
+  {
+    role: "tool",
+    content: [
+      {
+        type: "tool-result",
+        toolCallId: "c1",
+        toolName: "getWeather",
+        output: { type: "json", value: { temp: 21 } },
+      },
+    ],
+  },
+]);
+// -> 2 messages. The tool result is folded into the assistant message as a
+//    `tool-getWeather` part with state 'output-available'.
+```
+
+## The mapping
+
+- `text` and `reasoning` content becomes `text` and `reasoning` parts.
+- A `tool-call` becomes a `tool-<name>` part, `input-available` until its result arrives, then `output-available` - or `output-error` for a failure.
+- `tool` role messages are folded into the assistant message that called them, never emitted on their own.
+- Ids come from `options.generateId`, defaulting to the SDK's `generateId`.
+
+## What it refuses
+
+Content this version does not model - `file`, `image`, and provider-specific parts - **throws** rather than being guessed at, so a lossy conversion cannot reach your database.
+
+That is deliberate. A converter that silently dropped an image part would leave you with a row that renders differently from the conversation it came from, and no way to know which rows were affected.

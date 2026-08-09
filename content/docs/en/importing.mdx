@@ -1,0 +1,34 @@
+---
+title: Importing from the Vercel template
+description: The ai-chatbot template's Chat and Message_v2 tables map straight across.
+---
+
+If you started from Vercel's `ai-chatbot` template, its `Chat` and `Message_v2` tables map straight across - it already stores `UIMessage` parts, so this is a copy plus the parent chain this schema uses.
+
+```bash
+npx ai-sdk-threads import-vercel --database-url "$DATABASE_URL" --dry-run
+npx ai-sdk-threads import-vercel --database-url "$DATABASE_URL"
+```
+
+Threads that already exist are skipped, so a rerun after a partial import is safe.
+
+## Against a database handle you already have
+
+Both commands are exported, if you would rather run them programmatically than pass a connection string:
+
+```ts
+import { importVercelChat, migrateDatabase } from "ai-sdk-threads/cli";
+```
+
+## What the import does
+
+- Each `Chat` row becomes an `ai_sdk_threads` row, keeping its id and `userId`.
+- Each `Message_v2` row becomes an `ai_sdk_messages` row with its `parts` verbatim.
+- Messages are chained into a linear `parent_id` path in `createdAt` order, and the thread's `active_leaf_id` is set to the last one - so the imported conversation is the live path and [branching](/en/docs/api/branching) works from there on.
+- Rows are stamped with the `ai` major that the store is configured for.
+
+The CLI needs a Postgres driver of its own - `npm i -D pg` - because this package ships none.
+
+## Why `Message_v2` exists at all
+
+The template carries a `Message_v2` table because migrating the original `Message` table in place was not practical when the stored shape changed. That is the problem `sdk_version` exists to avoid here - see [Migrating](/en/docs/migrating).

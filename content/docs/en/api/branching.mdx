@@ -1,0 +1,64 @@
+---
+title: Branching
+description: Edit or regenerate a message and the old version survives as a sibling, the way ChatGPT does it.
+---
+
+Messages have always formed a tree here - `parentId` on every row, `activeLeafId` on the thread. These are the operations that use it. **Nothing is ever deleted**: editing or regenerating leaves the old version in place as a sibling.
+
+The UI for this exists in ai-elements; the storage behind it does not exist anywhere else ([vercel/ai#2929](https://github.com/vercel/ai/issues/2929), open since 2024).
+
+## The two common cases are automatic
+
+`chatHandler` wires these for you, from what the SDK client already sends:
+
+| The user does | The client sends | The handler does |
+| --- | --- | --- |
+| `regenerate()` | `trigger: "regenerate-message"`, `messageId` optional | `regenerateFrom` - the new answer becomes a sibling |
+| Edits an earlier message | `messageId` with changed parts | `replaceMessage` - the old version becomes a sibling |
+| Retries unchanged | `messageId` with identical parts | nothing new is stored |
+
+A bare `regenerate()` sends no `messageId`, meaning "redo the last answer" - that is handled. Regenerating a **user** message re-answers it rather than removing it. An id that is not on the thread's current path answers **400** rather than silently dropping the edit.
+
+So regenerate and edit work with no extra code.
+
+## The store methods
+
+| Method | Returns | Notes |
+| --- | --- | --- |
+| `siblingsOf(threadId, messageId)` | `{ siblings, index }` | Everything sharing that message's parent, oldest first. |
+| `setActiveLeaf(threadId, messageId)` | `Promise<void>` | Switches which path is live. Any message in the thread will do. |
+| `getTree(threadId)` | `Promise<StoredMessage[]>` | Every message, flat. Walk `parentId` to rebuild the shape. |
+| `forkAt(threadId, messageId, messages)` | `Promise<StoredMessage[]>` | New branch from that message's parent. |
+| `replaceMessage(threadId, messageId, msg)` | `Promise<StoredMessage>` | Rewrites a message, keeping its id; the old version becomes a sibling. |
+| `regenerateFrom(threadId, messageId)` | `Promise<{ leafId }>` | Points the leaf where a fresh answer belongs. |
+
+**Every one takes a `threadId`.** Message ids are a global primary key, so an id passed without its thread could reach another user's messages - these refuse an id that does not belong to the thread named.
+
+## Previous and next over an answer's variants
+
+`siblingsOf` plus `setActiveLeaf` is the whole interaction:
+
+```ts fragment
+const { siblings, index } = await store.siblingsOf(threadId, messageId);
+
+// "< 2 / 3 >"
+const target = siblings[index + 1];
+if (target) await store.setActiveLeaf(threadId, target.id);
+```
+
+`loadMessages` then returns the newly selected path, so re-rendering from it is all the UI has to do. This is the shape [ai-elements' `MessageBranch`](https://ai-sdk.dev/elements) expects.
+
+## An edit keeps the message id
+
+The edited row is rewritten in place and the previous version is archived under a new id, taking the replies that answered it. That means your client's id stays valid, so the same message can be edited repeatedly without reloading, and switching back to an older version brings its whole conversation with it.
+
+`replaceMessage` refuses a role change: you cannot replace a `user` message with an `assistant` one, which is what stops a client rewriting the model's words into its own.
+
+## Repairing a broken leaf
+
+`setActiveLeaf` is also the repair path if a leaf ever points at a message that no longer exists: point it at any message still in the thread and the thread is readable again.
+
+```ts fragment
+const tree = await store.getTree(threadId);
+if (tree[0]) await store.setActiveLeaf(threadId, tree[0].id);
+```

@@ -1,0 +1,77 @@
+---
+title: The store
+description: createThreadStore, thread and message methods, keyset pagination, and orderPath.
+---
+
+## `createThreadStore(db)`
+
+Returns a `ThreadStore` backed by the two tables. `db` is any drizzle Postgres database - `PgDatabase`, which covers node-postgres, postgres.js, Neon, Vercel Postgres, and PGlite.
+
+```ts
+// lib/threads.ts
+import { createThreadStore } from "ai-sdk-threads/drizzle";
+import { db } from "./db";
+
+export const store = createThreadStore(db);
+```
+
+If you are on `ai` 6.x, pass the major you are writing so a future migration reads the right stamp:
+
+```ts fragment
+const sixStore = store; // createThreadStore(db, { sdkVersion: 6 })
+```
+
+## Threads
+
+| Method | Returns | Notes |
+| --- | --- | --- |
+| `createThread(input?)` | `Promise<Thread>` | `input`: `{ id?, userId?, title?, metadata? }`. An id is generated when omitted. |
+| `getThread(id)` | `Promise<Thread \| null>` | `null` rather than a throw, so a missing thread is a 404 you handle. |
+| `listThreads(query?)` | `Promise<{ threads, nextCursor? }>` | `query`: `{ userId?, limit?, cursor? }`. Newest first, default limit 20. |
+| `updateThread(id, patch)` | `Promise<Thread>` | `patch`: `{ title?, visibility?, metadata? }`. Throws if the thread does not exist. |
+| `deleteThread(id)` | `Promise<void>` | Messages cascade with it. Deleting an absent thread is a no-op. |
+
+A `Thread` is `{ id, userId, title, visibility, activeLeafId, metadata, createdAt, updatedAt }`.
+
+### Keyset pagination
+
+`listThreads` pages with a keyset cursor over `(createdAt, id)`, not `OFFSET`, so page 400 costs what page 1 does. Pass `nextCursor` back and stop when it comes back `undefined`:
+
+```ts fragment
+let cursor: string | undefined;
+do {
+  const page = await store.listThreads({ userId: "user_123", limit: 20, cursor });
+  console.log(page.threads);
+  cursor = page.nextCursor;
+} while (cursor);
+```
+
+The timestamp columns are deliberately millisecond precision for this reason - see [Schema](/en/docs/api/schema#why-millisecond-precision).
+
+## Messages
+
+| Method | Returns | Notes |
+| --- | --- | --- |
+| `appendMessages(threadId, msgs)` | `Promise<StoredMessage[]>` | Takes `UIMessage[]`. Transactional. Throws if the thread is absent. |
+| `loadMessages(threadId)` | `Promise<UIMessage[]>` | Ordered oldest first, validated by the SDK before it is returned. |
+
+`appendMessages` uses each `UIMessage`'s own `id` as the row's primary key, because `useChat` already owns message ids. Messages are chained to the end of the thread and the thread's `activeLeafId` moves to the last one, inside one transaction that locks the thread row - so two concurrent appends cannot interleave.
+
+`loadMessages` returns `[]` for a thread with no messages yet. Before returning, rows pass through the SDK's own `validateUIMessages`, so a row that no longer matches the SDK's shape fails loudly here rather than in your renderer.
+
+```ts fragment
+const messages = await store.loadMessages(threadId);
+console.log(messages.map((m) => m.role));
+```
+
+## `orderPath(rows, activeLeafId)`
+
+Walks `parentId` links from a leaf back to the root and returns the rows oldest first. `loadMessages` uses it; it is exported for when you query the tables yourself.
+
+```ts
+import { orderPath } from "ai-sdk-threads";
+```
+
+Returns `[]` for a `null` leaf and throws on a broken link, naming the id it could not find. If a leaf ever points at a message that no longer exists, [`setActiveLeaf`](/en/docs/api/branching) is the repair path.
+
+Because a thread is genuinely a tree once anything has been edited or regenerated, walk `parent_id` from `active_leaf_id` rather than sorting by `created_at` if you query the tables directly - a plain sort interleaves branches that were never part of the same conversation.
