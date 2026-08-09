@@ -12,6 +12,8 @@ export function Hero({ lang }: { lang: string }) {
         <p className="text-fd-muted-foreground text-lg">{SITE_DESCRIPTION}</p>
       </div>
 
+      <div aria-hidden className="hero-rule" />
+
       <InstallCommand />
       <div className="flex gap-3">
         <Link

@@ -1,83 +1,189 @@
+<div align="center">
+
 # ai-sdk-threads docs
 
-[![CI](https://github.com/nixrajput/ai-sdk-threads-docs/actions/workflows/ci.yml/badge.svg)](https://github.com/nixrajput/ai-sdk-threads-docs/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+Documentation site for [ai-sdk-threads](https://github.com/nixrajput/ai-sdk-threads), chat thread and message persistence for the Vercel AI SDK.
 
-Documentation site for [ai-sdk-threads](https://github.com/nixrajput/ai-sdk-threads), chat thread and message persistence for the Vercel AI SDK. Built with Next.js and Fumadocs.
+<br />
 
-Live at https://ai-sdk-threads.nixrajput.com.
+[![Stars](https://img.shields.io/github/stars/nixrajput/ai-sdk-threads-docs?color=159F7C)][repo]
+[![Contributors](https://img.shields.io/github/contributors/nixrajput/ai-sdk-threads-docs?color=159F7C)][contributors]
+[![License: MIT](https://img.shields.io/github/license/nixrajput/ai-sdk-threads-docs?color=159F7C)][license]
+[![Last commit](https://img.shields.io/github/last-commit/nixrajput/ai-sdk-threads-docs?label=last%20commit)][repo]
+[![Issues](https://img.shields.io/github/issues/nixrajput/ai-sdk-threads-docs?label=issues)][issues]
+[![PRs](https://img.shields.io/github/issues-pr/nixrajput/ai-sdk-threads-docs?label=PRs)][pulls]
 
-**This repo holds documentation content and the site that serves it, not the package.** The package lives at [nixrajput/ai-sdk-threads](https://github.com/nixrajput/ai-sdk-threads) and is published to [npm](https://www.npmjs.com/package/ai-sdk-threads). A change to the package's behavior belongs there; a change to how it is documented belongs here.
+</div>
 
-## Running locally
+---
 
-Requires Node.js `>=20.9` (Next 16's own floor) and npm. CI runs Node 22.
+## Contents
+
+- [ai-sdk-threads docs](#ai-sdk-threads-docs)
+  - [Contents](#contents)
+  - [Overview](#overview)
+  - [Tech stack](#tech-stack)
+  - [Getting started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Install](#install)
+    - [Run](#run)
+  - [Project structure](#project-structure)
+  - [The checks a PR must pass](#the-checks-a-pr-must-pass)
+  - [Adding a docs page](#adding-a-docs-page)
+  - [Adding a language](#adding-a-language)
+  - [Contributing](#contributing)
+  - [Contributors](#contributors)
+  - [License](#license)
+  - [Support the project](#support-the-project)
+  - [Connect](#connect)
+
+## Overview
+
+This repo holds the documentation content and the site that serves it, live at [ai-sdk-threads.nixrajput.com](https://ai-sdk-threads.nixrajput.com). It does not hold the `ai-sdk-threads` package itself - that lives at [nixrajput/ai-sdk-threads](https://github.com/nixrajput/ai-sdk-threads) and publishes to [npm](https://www.npmjs.com/package/ai-sdk-threads). Package-behavior changes go there; documentation changes come here, in a separate PR.
+
+## Tech stack
+
+| Area        | Choice                        |
+| ----------- | ----------------------------- |
+| Framework   | Next.js 16 (App Router)       |
+| UI          | React 19                      |
+| Docs engine | Fumadocs 16                   |
+| Styling     | Tailwind CSS 4                |
+| Language    | TypeScript (strict), ESM only |
+| Deployment  | Vercel                        |
+
+## Getting started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) `>=20.9` - Next 16's own floor, so `20.0` through `20.8` will not install
+- npm
+
+### Install
 
 ```bash
+git clone https://github.com/nixrajput/ai-sdk-threads-docs.git
+cd ai-sdk-threads-docs
 npm install
+```
+
+### Run
+
+```bash
 npm run dev
 ```
 
 Open http://localhost:3000. The root redirects to `/en`.
 
-## Scripts
+## Project structure
 
-| Script                  | What it does                                                             |
-| ----------------------- | ------------------------------------------------------------------------ |
-| `npm run dev`           | Dev server                                                               |
-| `npm run build`         | Production build; fails on broken MDX and bad internal links             |
-| `npm start`             | Serve the production build, needed by `check:routes`                     |
-| `npm run lint`          | ESLint                                                                   |
-| `npm run types:check`   | `next typegen` then `tsc --noEmit`                                       |
-| `npm run check:samples` | Extracts every docs code fence and typechecks it against the npm package |
-| `npm run check:routes`  | End-to-end route check against a running server                          |
-| `npm run format`        | Prettier write                                                           |
-| `npm run format:check`  | Prettier check, part of the gate                                         |
+```
+app/[lang]/...    route segments (i18n-aware; [lang] currently resolves to "en")
+content/docs/en/  MDX documentation source
+components/       site chrome and homepage components
+lib/source.ts     Fumadocs content source adapter
+lib/i18n.ts       i18n config (locales, default locale)
+lib/shared.ts     shared site constants (URLs, copy, developer info)
+proxy.ts          i18n routing plus the non-localized route allowlist
+```
 
-The full gate, which CI and `.githooks/pre-push` both run:
+Two structural details that are easy to trip over:
+
+- **`app/[lang]/layout.tsx` is the root layout, and there is no `app/layout.tsx`.** That is what makes `<html lang>` dynamic, and it works only because nothing outside `[lang]` is a page.
+- **A new top-level route must be added to `NON_LOCALIZED_ROUTES` in `proxy.ts`.** Otherwise the i18n proxy rewrites it into `/en/...`, which 404s - and because that happens at the redirect step, the response still reports 200, so nothing looks broken. `npm run check:routes` asserts every such route serves 200 under `redirect: "manual"`, which is the guard that catches it.
+
+## The checks a PR must pass
+
+CI runs exactly this set, and `.githooks/pre-push` runs the first five locally if you opt in (`git config core.hooksPath .githooks`):
 
 ```bash
-npm run lint && npm run types:check && npm run check:samples && npm run format:check && npm run build
+npm run lint          # eslint
+npm run types:check   # next typegen + tsc --noEmit
+npm run check:samples # extract + typecheck docs code samples
+npm run format:check  # prettier --check
+npm run build         # next build
+npm run check:routes  # end-to-end route check, against `npm start`
 ```
+
+`npm run format` rewrites formatting if `format:check` complains. No version bump is required - this site is not versioned or published.
+
+`check:samples` is worth understanding before writing a code block: it extracts every `ts` and `tsx` fence from `content/docs/**` and typechecks it against `ai-sdk-threads` **installed from npm**, not a local build, so the docs prove the shipped package behaves as documented. Two fence flags exist - `notype` opts a fence out, for prose illustrations and raw SQL, and `fragment` wraps it in a preamble declaring an ambient `db`, `store`, `threadId` and `messageId` so short snippets need no setup.
 
 ## Adding a docs page
 
-1. Create the MDX file under `content/docs/en/`. Content is per-locale by directory, because `lib/i18n.ts` sets `parser: "dir"` and `hideLocale: "never"` - so every URL carries its locale and adding a language later rewrites no indexed URL.
-2. Add its slug to the relevant `meta.json` in that directory so it appears in the sidebar.
-3. Run `npm run dev` and check it renders.
+1. Create the MDX file under `content/docs/en/`.
+2. Add its slug to the relevant `meta.json` in that directory, so it shows up in the sidebar.
+3. Run `npm run dev` and check the page renders.
 
-`en` is currently the only locale. Adding another touches exactly two things: `lib/i18n.ts` and a new `content/docs/<code>/` directory.
+## Adding a language
 
-## Two things that will bite you
+The i18n wiring supports additional locales already. Adding one takes exactly two steps:
 
-**`app/[lang]/layout.tsx` is the root layout, and there is no `app/layout.tsx`.** That is what makes `<html lang>` dynamic, and it works only because nothing outside `[lang]` is a page. Do not add one.
+1. Add the language code to `languages` and its display name to `localeNames`, both in `lib/i18n.ts`.
+2. Create `content/docs/<code>/` mirroring `content/docs/en/` - the same file and directory names, including each `meta.json`, with translated frontmatter `title`/`description` and body.
 
-**A new top-level route must be added to `NON_LOCALIZED_ROUTES` in `proxy.ts`.** Otherwise the i18n proxy rewrites it into `/en/...`, which 404s - and because the failure happens at the redirect step, the response still reports 200, so nothing looks broken. `npm run check:routes` asserts every such route serves 200 under `redirect: "manual"`, which is the guard that catches it.
+No layout, provider, proxy, or route file needs any edit.
 
-## Code samples are typechecked
+A few things worth knowing before you start:
 
-`npm run check:samples` extracts every `ts` and `tsx` fence from `content/docs/**` and typechecks it against `ai-sdk-threads` **installed from npm**, not a local build. A sample that stops compiling fails the build, so the docs prove the _shipped_ package behaves as documented. Two fence flags:
-
-- `notype` - opts a fence out, for prose illustrations and raw SQL.
-- `fragment` - wraps the fence in a preamble that declares an ambient `db`, `store`, `threadId` and `messageId`, so short snippets need no setup boilerplate.
+- Untranslated pages fall back to English automatically, so a partial translation is a valid PR - you do not need to translate everything at once.
+- Code samples inside MDX should not be translated. They are typechecked against the real package by `npm run check:samples`, and translating identifiers will fail that check. Translate the prose around them instead.
+- Every URL carries its locale (`/en/...`, `/<code>/...`), so a new language never changes existing URLs.
+- Run [the checks a PR must pass](#the-checks-a-pr-must-pass) before opening the PR.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). This site is not versioned or published, so no PR here ever needs a version bump. Please also read the [Code of Conduct](CODE_OF_CONDUCT.md).
+Contributions are welcome. Fork, branch, and open a PR - see [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow. Bugs and ideas go to [Issues][issues]. Vulnerabilities in the site follow [SECURITY.md](SECURITY.md); vulnerabilities in the package belong in [the package repo's advisories](https://github.com/nixrajput/ai-sdk-threads/security/advisories/new).
 
-## Security
+## Contributors
 
-Vulnerabilities in the **site** follow [SECURITY.md](SECURITY.md). Vulnerabilities in the **package** belong in the [package repo](https://github.com/nixrajput/ai-sdk-threads/security/advisories/new). Never a public issue, either way.
+Thanks to everyone who has contributed to the ai-sdk-threads docs.
+
+<a href="https://github.com/nixrajput/ai-sdk-threads-docs/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=nixrajput/ai-sdk-threads-docs" alt="Contributors" />
+</a>
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+Licensed under the **MIT** license - see [LICENSE](LICENSE).
 
 ## Support the project
 
-If these docs saved you time, a star on [the package repo](https://github.com/nixrajput/ai-sdk-threads) helps more people find it.
+<div align="center">
+
+This site is MIT licensed and free to use, always. If it helps you get more out of ai-sdk-threads, sponsorship is welcome.
+
+<br />
+
+<a href="https://github.com/sponsors/nixrajput">
+  <img src="https://img.shields.io/badge/Sponsor_on_GitHub-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="GitHub Sponsors" />
+</a>
+<a href="https://ko-fi.com/nixrajput">
+  <img src="https://img.shields.io/badge/Ko--fi-FF5E5B?style=for-the-badge&logo=kofi&logoColor=white" alt="Ko-fi" />
+</a>
+<a href="https://www.buymeacoffee.com/nixrajput">
+  <img src="https://img.shields.io/badge/Buy_Me_a_Coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Buy Me a Coffee" />
+</a>
+
+</div>
 
 ## Connect
 
-- Portfolio: https://nixrajput.com
-- GitHub: [@nixrajput](https://github.com/nixrajput)
+<div align="center">
+
+**Nikhil Rajput**
+
+<a href="https://github.com/nixrajput"><img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a>
+<a href="https://linkedin.com/in/nixrajput"><img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>
+<a href="https://x.com/nixrajput"><img src="https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white" alt="X" /></a>
+<a href="https://instagram.com/nixrajput"><img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram" /></a>
+<a href="https://telegram.me/nixrajput"><img src="https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram" /></a>
+<a href="mailto:nkr.nikhil.nkr@gmail.com"><img src="https://img.shields.io/badge/Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Email" /></a>
+
+</div>
+
+[repo]: https://github.com/nixrajput/ai-sdk-threads-docs
+[issues]: https://github.com/nixrajput/ai-sdk-threads-docs/issues
+[pulls]: https://github.com/nixrajput/ai-sdk-threads-docs/pulls
+[contributors]: https://github.com/nixrajput/ai-sdk-threads-docs/graphs/contributors
+[license]: https://github.com/nixrajput/ai-sdk-threads-docs/blob/main/LICENSE
