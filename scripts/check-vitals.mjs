@@ -1,11 +1,19 @@
-// Measures what the browser actually downloads per route, plus server response time, and
-// fails on regression. Deliberately not Lighthouse: this runs against `npm start` with no
-// browser dependency, so it is stable enough to gate a PR. Real LCP and CLS need a browser
-// and are measured by hand before a release rather than gated here - a flaky perf gate
-// teaches people to ignore CI.
-//
-// Budgets are set from measurement, not aspiration; see the table in the docs-site plan.
-const base = process.env.BASE_URL ?? "http://localhost:3100";
+// Payload and response-time budgets per route, measured against `npm start`. Not
+// Lighthouse: no browser dependency, so it is stable enough to gate a PR. Real LCP and CLS
+// are measured by hand before a release - a flaky perf gate teaches people to ignore CI.
+const base = process.env.BASE_URL ?? "http://localhost:3000";
+
+// Both checks need a server; without this the failure is an undici stack trace that says
+// nothing about what to do.
+async function get(url) {
+  try {
+    return await fetch(url);
+  } catch {
+    console.error(`FAIL: nothing is listening at ${base}`);
+    console.error("Start the site first:  npm start   (or BASE_URL=... npm run check:vitals)");
+    process.exit(1);
+  }
+}
 
 const BUDGETS = [
   // The marketing page and the docs are the pages that must stay light.
@@ -16,11 +24,26 @@ const BUDGETS = [
   { path: "/en/playground", js: 700, ttfb: 800 },
 ];
 
+// Whatever is on the port is not necessarily this site, and not necessarily a production
+// build. Both mistakes produce believable numbers: a dev server measured 4.5 MB against a
+// real 730 KB, because dev serves unminified bundles.
+const identity = await (await get(`${base}/en`)).text();
+if (!identity.includes("ai-sdk-threads")) {
+  console.error(`FAIL: ${base} is serving a different site`);
+  console.error("Point BASE_URL at this site's `npm start`, not another server on that port.");
+  process.exit(1);
+}
+if (identity.includes("next-devtools")) {
+  console.error(`FAIL: ${base} is a dev server, so these numbers would be meaningless`);
+  console.error("Measure a production build:  npm run build && npm start");
+  process.exit(1);
+}
+
 let failed = false;
 
 for (const { path, js: jsBudget, ttfb: ttfbBudget } of BUDGETS) {
   const started = Date.now();
-  const res = await fetch(`${base}${path}`);
+  const res = await get(`${base}${path}`);
   const html = await res.text();
   const ttfb = Date.now() - started;
 
@@ -35,7 +58,7 @@ for (const { path, js: jsBudget, ttfb: ttfbBudget } of BUDGETS) {
   ];
   let bytes = 0;
   for (const asset of assets) {
-    const r = await fetch(`${base}${asset}`);
+    const r = await get(`${base}${asset}`);
     bytes += (await r.arrayBuffer()).byteLength;
   }
   const kb = bytes / 1024;

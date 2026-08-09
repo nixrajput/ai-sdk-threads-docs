@@ -22,11 +22,9 @@ const textOf = (row: Row) => {
   return parts.map((p) => (p.type === "text" ? p.text : `[${p.type}]`)).join(" ");
 };
 
-// Loaded from our own origin at runtime instead of bundled: Turbopack rewrites PGlite's
-// Emscripten glue into something that throws "m.instantiateWasm is not a function", and
-// passing prebuilt WebAssembly.Modules does not avoid it. The specifier is a variable so
-// no bundler can statically analyse and claim it; the browser resolves the dist's relative
-// chunk imports itself. scripts/copy-pglite.mjs puts the dist at /pglite.
+// Loaded from our origin at runtime, not bundled: Turbopack rewrites PGlite's Emscripten
+// glue into "m.instantiateWasm is not a function", and prebuilt WebAssembly.Modules do not
+// avoid it. Variable specifier so no bundler can claim it. Dist copied to /pglite.
 async function loadPGlite(): Promise<typeof PGlite> {
   const entry = "/pglite/index.js";
   const mod = (await import(/* webpackIgnore: true */ entry)) as { PGlite: typeof PGlite };

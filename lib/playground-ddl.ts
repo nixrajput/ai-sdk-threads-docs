@@ -1,7 +1,6 @@
-// Transcribed from the package's own drizzle schema (src/drizzle/schema.ts), which is
-// the coupling this file cannot avoid: the browser has no migration tooling, so the DDL
-// is duplicated here. Playground.tsx guards it with a round trip on boot, so a schema
-// that has moved on fails loudly on the demo rather than rendering a subtly wrong tree.
+// Transcribed from the package's drizzle schema: the browser has no migration tooling, so
+// this duplication is unavoidable. Playground.tsx guards it with a round trip on boot, so a
+// schema that moved on fails loudly instead of rendering a subtly wrong tree.
 export const PLAYGROUND_DDL = `
 CREATE TABLE IF NOT EXISTS ai_sdk_threads (
   id text PRIMARY KEY,

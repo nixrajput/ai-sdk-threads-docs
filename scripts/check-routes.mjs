@@ -3,6 +3,19 @@
 // (see lib/source.ts) that must never gain a locale prefix. Run via `npm run check:routes`.
 const base = process.env.BASE_URL ?? "http://localhost:3000";
 
+// Without this, a server that is not running fails as an undici stack trace that says
+// nothing about what to do.
+const originalFetch = globalThis.fetch;
+globalThis.fetch = async (...args) => {
+  try {
+    return await originalFetch(...args);
+  } catch {
+    console.error(`FAIL: nothing is listening at ${base}`);
+    console.error("Start the site first:  npm start   (or BASE_URL=... npm run check:routes)");
+    process.exit(1);
+  }
+};
+
 // Routes whose page does not exist yet. Listed rather than omitted so a shortened
 // check is visible in the output instead of reading as full coverage. Empty this
 // as the pages land; the run fails once it is empty and a route still 404s.
@@ -41,10 +54,9 @@ for (const needle of [
 }
 console.log("PASS: home page renders its positioning copy");
 
-// The i18n proxy rewriting /_next/** kills every stylesheet while the page still
-// returns 200, so assert the sheet the page references actually serves. Discovered
-// by reference rather than by path: Next 16 emits CSS under static/chunks, not
-// static/css, so a hardcoded path silently matches nothing and reads as a pass.
+// The proxy rewriting /_next/** kills every stylesheet while the page still returns 200.
+// Discovered by reference, not by path: Next 16 emits CSS under static/chunks, so a
+// hardcoded static/css path matches nothing and reads as a pass.
 const sheets = [...html.matchAll(/href="(\/_next\/[^"]+\.css)"/g)].map((m) => m[1]);
 if (sheets.length === 0) {
   console.error("FAIL: home page references no stylesheet");
@@ -60,11 +72,9 @@ for (const sheet of sheets) {
 }
 console.log(`PASS: ${sheets.length} stylesheet(s) serve with content`);
 
-// The version pill is fetched from the npm registry and renders nothing when that
-// fetch fails, which is deliberate - an outage must not print a stale or invented
-// number. So a missing pill is reported rather than failed, since CI cannot tell an
-// upstream outage from a regression. React splits adjacent text nodes with comment
-// markers, so strip those before matching.
+// The pill renders nothing when the registry fetch fails, deliberately - so a missing pill
+// is reported, not failed: CI cannot tell an outage from a regression. React splits adjacent
+// text nodes with comment markers, so strip those before matching.
 const pill = html.replace(/<!-- -->/g, "").match(/v(\d+\.\d+\.\d+) on npm/);
 if (pill) console.log(`PASS: home page shows the package version (v${pill[1]})`);
 else console.log("WARN: home page shows no version pill - registry fetch failed, or a regression");
