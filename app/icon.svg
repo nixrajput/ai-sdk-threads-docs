@@ -1,8 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
   <rect width="32" height="32" rx="7" fill="#141118" />
-  <!-- A turn forking into two replies: amber is the abandoned sibling, violet the
-       live path, the same two roles the site codes branch state with. Dark tile in
-       both themes, since a browser tab has no theme to follow. -->
-  <path d="M7 5 L7 16 Q7 23 14 23 L26 23" fill="none" stroke="#f0a868" stroke-width="3.2" stroke-linecap="round" />
-  <path d="M7 16 Q7 9 14 9 L26 9" fill="none" stroke="#9b8cff" stroke-width="3.2" stroke-linecap="round" />
+  <!-- A thread of messages where one reply branches off: two earlier turns, then an
+       elbow down into a third on its own path. Violet is the live path, matching the
+       role global.css gives it. Dark tile in both themes, since a tab has no theme
+       to follow. Bar widths differ so the stack cannot read as a list icon. -->
+  <rect x="6" y="6" width="13" height="5.4" rx="2.7" fill="#e9e6ef" />
+  <rect x="6" y="13.3" width="10" height="5.4" rx="2.7" fill="#6b6478" />
+  <path d="M9 18.7v5.6h4.2" stroke="#9b8cff" stroke-width="2.2" fill="none" stroke-linecap="round" />
+  <rect x="13" y="21.6" width="13" height="5.4" rx="2.7" fill="#9b8cff" />
 </svg>
