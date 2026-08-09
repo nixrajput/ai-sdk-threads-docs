@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { RootProvider } from "fumadocs-ui/provider/next";
 import { Bricolage_Grotesque, JetBrains_Mono } from "next/font/google";
+import { SiteFooter } from "@/components/SiteFooter";
 import { i18n, localeNames } from "@/lib/i18n";
 import { appName, SITE_DESCRIPTION, SITE_TAGLINE, SITE_URL } from "@/lib/shared";
 import "../global.css";
@@ -44,6 +45,9 @@ export default async function Layout({ children, params }: LayoutProps<"/[lang]"
           }}
         >
           {children}
+          {/* Mounted in the root layout, not the home page, so docs and playground
+              routes end on the same footer instead of fumadocs' bare page end. */}
+          <SiteFooter lang={lang} />
         </RootProvider>
         <Analytics />
       </body>

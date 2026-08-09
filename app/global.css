@@ -6,6 +6,17 @@ html {
   scrollbar-gutter: stable;
 }
 
+/* Tailwind v4's preflight dropped v3's `cursor: pointer` on buttons, so every
+   button on the site - the install copy control, fumadocs' theme toggle, search
+   trigger and code-block copy - falls back to the UA default arrow. Restored in
+   @layer base rather than unlayered so a deliberate cursor-* utility still wins. */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
 html > body[data-scroll-locked] {
   margin-right: 0px !important;
   --removed-body-scroll-bar-size: 0px !important;
@@ -138,4 +149,12 @@ html > body[data-scroll-locked] {
     opacity: 1;
     transform: none;
   }
+}
+
+/* A hairline where a gradient wash would otherwise go: neutral, so it separates
+   the hero from what follows without the stock soft-blob look. */
+.hero-rule {
+  width: 3rem;
+  height: 1px;
+  background: var(--line);
 }

@@ -68,6 +68,15 @@ for (const sheet of sheets) {
 }
 console.log(`PASS: ${sheets.length} stylesheet(s) serve with content`);
 
+// The version pill is fetched from the npm registry and renders nothing when that
+// fetch fails, which is deliberate - an outage must not print a stale or invented
+// number. So a missing pill is reported rather than failed, since CI cannot tell an
+// upstream outage from a regression. React splits adjacent text nodes with comment
+// markers, so strip those before matching.
+const pill = html.replace(/<!-- -->/g, "").match(/v(\d+\.\d+\.\d+) on npm/);
+if (pill) console.log(`PASS: home page shows the package version (v${pill[1]})`);
+else console.log("WARN: home page shows no version pill - registry fetch failed, or a regression");
+
 for (const path of ["/en/docs", "/en/docs/getting-started"]) await expectOk(path);
 console.log("PASS: docs skeleton pages render");
 
