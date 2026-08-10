@@ -14,7 +14,8 @@
     "format:check": "prettier --check \"{app,components,lib,scripts}/**/*.{ts,tsx,css}\"",
     "check:samples": "tsx scripts/check-samples.ts && tsc -p tsconfig.samples.json",
     "check:routes": "node scripts/check-routes.mjs",
-    "check:vitals": "node scripts/check-vitals.mjs"
+    "check:vitals": "node scripts/check-vitals.mjs",
+    "check:spell": "cspell --no-progress \"**/*.{ts,tsx,mjs,css,md,mdx,json}\""
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.4",
@@ -40,6 +41,7 @@
     "@types/react-dom": "^19.2.4",
     "ai": "^7.0.58",
     "ai-sdk-threads": "^0.1.0",
+    "cspell": "^8.19.4",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.0",
     "postcss": "^8.5.25",

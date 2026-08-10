@@ -1,5 +1,5 @@
 #!/bin/sh
-# Pre-push gate. Runs lint + typecheck + samples check + format check + build
+# Pre-push gate. Runs lint + typecheck + samples check + spell check + format check + build
 # before every push so unformatted, lint-broken, type-broken, sample-broken, or
 # unbuildable content never reaches the remote.
 #
@@ -15,10 +15,11 @@ if [ ! -d node_modules ]; then
   exit 1
 fi
 
-echo "pre-push: running lint + typecheck + samples check + format check + build..."
+echo "pre-push: running lint + typecheck + samples check + spell check + format check + build..."
 npm run lint || { echo "pre-push: lint failed - fix it or run 'npm run format'." >&2; exit 1; }
 npm run types:check || { echo "pre-push: type errors - fix them before pushing." >&2; exit 1; }
 npm run check:samples || { echo "pre-push: docs code samples failed - fix them before pushing." >&2; exit 1; }
+npm run check:spell || { echo "pre-push: spelling issues - fix them or add the word to cspell.json." >&2; exit 1; }
 npm run format:check || { echo "pre-push: formatting issues - run 'npm run format'." >&2; exit 1; }
 npm run build || { echo "pre-push: build failed." >&2; exit 1; }
 echo "pre-push: checks passed."
