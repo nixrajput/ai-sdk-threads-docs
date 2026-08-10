@@ -82,6 +82,13 @@ export function SiteFooter({ lang }: { lang: string }) {
                 Releases
               </a>
             </li>
+            <li>
+              {/* Surfaced because agents are a real audience here, and an unlinked
+                  endpoint is one nobody discovers. */}
+              <a href="/llms.txt" className={LINK}>
+                llms.txt
+              </a>
+            </li>
           </ul>
         </div>
 
