@@ -19,14 +19,12 @@ export async function Hero({ lang }: { lang: string }) {
 
       <div className="flex flex-col items-center gap-2">
         <InstallCommand />
-        {version ? (
-          <a
-            href={NPM_URL}
-            className="text-fd-muted-foreground hover:text-fd-foreground rounded-sm font-mono text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--live)"
-          >
-            v{version} on npm
-          </a>
-        ) : null}
+        <a
+          href={NPM_URL}
+          className="text-fd-muted-foreground hover:text-fd-foreground rounded-sm font-mono text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--live)"
+        >
+          v{version} on npm
+        </a>
       </div>
 
       <div className="flex gap-3">

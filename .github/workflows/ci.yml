@@ -17,6 +17,7 @@ jobs:
       - run: npm run types:check
       - run: npm run check:samples
       - run: npm run format:check
+      - run: npm run check:spell
       - run: npm run build
       # Routes and budgets share one server: starting `next start` twice would double the
       # slowest step in the job for no extra signal.

@@ -35,3 +35,6 @@ next-env.d.ts
 .samples/
 # pglite assets, copied from node_modules by scripts/copy-pglite.mjs
 /public/pglite
+
+# Playwright MCP scratch output (snapshots, console logs)
+.playwright-mcp/
