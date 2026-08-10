@@ -1,17 +1,29 @@
 <div align="center">
 
+<img src="https://raw.githubusercontent.com/nixrajput/ai-sdk-threads/main/assets/logo.svg" width="76" alt="ai-sdk-threads">
+
 # ai-sdk-threads docs
 
-Documentation site for [ai-sdk-threads](https://github.com/nixrajput/ai-sdk-threads), chat thread and message persistence for the Vercel AI SDK.
+<em>The site behind <a href="https://www.npmjs.com/package/ai-sdk-threads">ai-sdk-threads</a> - including a Postgres that runs in your browser.</em>
 
 <br />
 
+[![CI](https://github.com/nixrajput/ai-sdk-threads-docs/actions/workflows/ci.yml/badge.svg)][ci]
 [![Stars](https://img.shields.io/github/stars/nixrajput/ai-sdk-threads-docs?color=159F7C)][repo]
 [![Contributors](https://img.shields.io/github/contributors/nixrajput/ai-sdk-threads-docs?color=159F7C)][contributors]
 [![License: MIT](https://img.shields.io/github/license/nixrajput/ai-sdk-threads-docs?color=159F7C)][license]
 [![Last commit](https://img.shields.io/github/last-commit/nixrajput/ai-sdk-threads-docs?label=last%20commit)][repo]
 [![Issues](https://img.shields.io/github/issues/nixrajput/ai-sdk-threads-docs?label=issues)][issues]
 [![PRs](https://img.shields.io/github/issues-pr/nixrajput/ai-sdk-threads-docs?label=PRs)][pulls]
+
+<strong>Next.js 16 &middot; Fumadocs &middot; i18n from day one &middot; code samples typechecked against the published package</strong><br>
+<sub>Every <code>ts</code> and <code>tsx</code> fence in these docs is extracted and compiled against <code>ai-sdk-threads</code> <strong>installed from npm</strong>, so a sample that stops matching the shipped package fails the build rather than misleading a reader. Three checks gate a PR beyond lint and types: <code>check:samples</code>, <code>check:routes</code>, and <code>check:vitals</code>.</sub>
+
+<br />
+
+**[Live site][site]** &middot; [Getting started][docs-start] &middot; [API reference][docs-api] &middot; [Playground][docs-playground] &middot; [llms.txt][llms]
+
+<sub><b>AI agents / LLMs:</b> this documentation is machine-readable at <a href="https://ai-sdk-threads.nixrajput.com/llms.txt"><code>llms.txt</code></a>, or as one blob at <a href="https://ai-sdk-threads.nixrajput.com/llms-full.txt"><code>llms-full.txt</code></a>.</sub>
 
 </div>
 
@@ -187,6 +199,12 @@ This site is MIT licensed and free to use, always. If it helps you get more out 
 
 </div>
 
+[ci]: https://github.com/nixrajput/ai-sdk-threads-docs/actions/workflows/ci.yml
+[site]: https://ai-sdk-threads.nixrajput.com
+[llms]: https://ai-sdk-threads.nixrajput.com/llms.txt
+[docs-start]: https://ai-sdk-threads.nixrajput.com/en/docs/getting-started
+[docs-api]: https://ai-sdk-threads.nixrajput.com/en/docs/api/chat-handler
+[docs-playground]: https://ai-sdk-threads.nixrajput.com/en/playground
 [repo]: https://github.com/nixrajput/ai-sdk-threads-docs
 [issues]: https://github.com/nixrajput/ai-sdk-threads-docs/issues
 [pulls]: https://github.com/nixrajput/ai-sdk-threads-docs/pulls
