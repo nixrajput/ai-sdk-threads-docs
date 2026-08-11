@@ -191,6 +191,14 @@ html > body[data-scroll-locked] {
   outline-offset: 2px;
 }
 
+/* Fumadocs pads the docs header row to 24px from md up, while the home header and every body
+   container sit at 16px - so the logo jumped 8px when crossing into the docs. */
+@media (width >= 48rem) {
+  #nd-subnav > div {
+    padding-inline: 1rem;
+  }
+}
+
 /* Registering these as theme fonts (rather than a one-off utility class) means
    the existing font-mono usage in InstallCommand picks up JetBrains Mono for
    free, with no change to that component. */
