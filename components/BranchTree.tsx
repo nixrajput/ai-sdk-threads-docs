@@ -29,7 +29,7 @@ export function BranchTree() {
   const reply = TREE.find((m) => m.id === leaf);
 
   return (
-    <section className="mx-auto max-w-3xl px-4 pb-12">
+    <section className="mx-auto w-full max-w-(--site-width) border-t border-(--line) px-4 py-12">
       <p className="font-display text-xs font-semibold tracking-[0.2em] text-(--muted) uppercase">
         Branching
       </p>
@@ -41,7 +41,7 @@ export function BranchTree() {
         overwrite. Nothing is ever deleted.
       </p>
 
-      <div className="border-fd-border bg-fd-card mt-6 rounded-lg border p-4">
+      <div className="card mt-6 p-4">
         <p className="text-fd-muted-foreground font-mono text-xs">ai_sdk_messages</p>
 
         <div className="mt-3 space-y-2">

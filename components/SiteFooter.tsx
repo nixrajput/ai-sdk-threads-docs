@@ -11,7 +11,7 @@ export function SiteFooter({ lang }: { lang: string }) {
 
   return (
     <footer className="border-t border-(--line)">
-      <div className="mx-auto grid max-w-3xl gap-10 px-4 py-12 sm:grid-cols-2 md:grid-cols-4">
+      <div className="mx-auto grid max-w-(--site-width) gap-10 px-4 py-12 sm:grid-cols-2 md:grid-cols-4">
         <div>
           <Link
             href={`/${lang}`}
@@ -110,7 +110,7 @@ export function SiteFooter({ lang }: { lang: string }) {
       </div>
 
       <div className="border-t border-(--line)">
-        <p className="text-fd-muted-foreground mx-auto max-w-3xl px-4 py-6 font-mono text-xs">
+        <p className="text-fd-muted-foreground mx-auto max-w-(--site-width) px-4 py-6 font-mono text-xs">
           © {year} {DEVELOPER.name}. MIT licensed.
         </p>
       </div>

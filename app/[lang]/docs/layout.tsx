@@ -1,5 +1,6 @@
 import { source } from "@/lib/source";
-import { DocsLayout } from "fumadocs-ui/layouts/docs";
+// notebook, not layouts/docs: only this one renders a top nav, so the header survives home -> docs.
+import { DocsLayout } from "fumadocs-ui/layouts/notebook";
 import { baseOptions } from "@/lib/layout.shared";
 
 export default async function Layout({ children, params }: LayoutProps<"/[lang]/docs">) {

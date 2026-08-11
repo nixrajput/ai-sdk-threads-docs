@@ -48,7 +48,7 @@ function Pane({
   accent: string;
 }) {
   return (
-    <div className="border-fd-border bg-fd-card flex flex-col rounded-lg border">
+    <div className="card flex flex-col">
       <div className="border-fd-border flex items-baseline justify-between gap-2 border-b px-3 py-2">
         <span className="font-mono text-xs" style={{ color: accent }}>
           {label}
@@ -69,7 +69,7 @@ function Pane({
 
 export function BoilerplateContrast() {
   return (
-    <section className="mx-auto max-w-3xl px-4 pb-12">
+    <section className="mx-auto w-full max-w-(--site-width) border-t border-(--line) px-4 py-12">
       <p className="font-display text-xs font-semibold tracking-[0.2em] text-(--muted) uppercase">
         The route
       </p>

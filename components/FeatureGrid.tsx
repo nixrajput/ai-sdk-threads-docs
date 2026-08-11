@@ -29,16 +29,19 @@ const FEATURES = [
 
 export function FeatureGrid() {
   return (
-    <section className="mx-auto max-w-3xl px-4 pb-12">
+    <section className="mx-auto w-full max-w-(--site-width) border-t border-(--line) px-4 py-12">
       <p className="font-display text-xs font-semibold tracking-[0.2em] text-(--muted) uppercase">
         Coverage
       </p>
       <h2 className="mt-2 text-2xl font-bold tracking-tight">What ai-sdk-threads gives you</h2>
-      <dl className="mt-6 grid gap-x-8 gap-y-5 sm:grid-cols-2">
+      <dl className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {FEATURES.map((f) => (
-          <div key={f.title} className="border-t border-(--line) pt-3">
-            <dt className="font-semibold">{f.title}</dt>
-            <dd className="text-fd-muted-foreground mt-1 text-sm">{f.body}</dd>
+          <div
+            key={f.title}
+            className="card hover:bg-fd-accent/40 flex flex-col gap-2 p-4 transition-colors"
+          >
+            <dt className="text-base font-medium">{f.title}</dt>
+            <dd className="text-fd-muted-foreground text-sm">{f.body}</dd>
           </div>
         ))}
       </dl>

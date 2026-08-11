@@ -7,8 +7,8 @@ export async function Hero({ lang }: { lang: string }) {
   const version = await latestVersion();
 
   return (
-    <section className="relative isolate mx-auto flex max-w-3xl flex-col items-center gap-6 px-4 py-12 text-center sm:py-14">
-      <div className="flex flex-col items-center gap-4">
+    <section className="relative isolate mx-auto flex w-full max-w-(--site-width) flex-col items-center gap-6 px-4 py-12 text-center sm:py-14">
+      <div className="flex max-w-(--site-measure) flex-col items-center gap-4">
         <h1 className="font-display text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
           {SITE_TAGLINE}
         </h1>

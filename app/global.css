@@ -22,6 +22,38 @@ html > body[data-scroll-locked] {
   --removed-body-scroll-bar-size: 0px !important;
 }
 
+/* Full-bleed shell, bounded text - the shape ui.shadcn.com uses (its sections span the viewport,
+   its h1 stops at 896px). The nav reads --site-width too, so the two cannot drift apart again:
+   the sections were 768px under a 1400px nav. */
+:root {
+  --site-width: 100%;
+  --site-measure: 56rem;
+}
+
+/* The nav and the content wrapper each declare this locally (the wrapper caps its children with
+   `*:max-w-(--fd-layout-width)`), so both need overriding or the page stays in a 1400px band. */
+#nd-home-layout,
+#nd-home-layout main {
+  --fd-layout-width: var(--site-width);
+}
+
+/* Fumadocs centres the docs shell in a 97rem band, which spends 184px a side on gutters at 1920px.
+   Full-bleed instead, so the sidebar and table of contents sit against the viewport edges. */
+#nd-notebook-layout {
+  --fd-layout-width: 100%;
+}
+
+/* The notebook layout caps each direct child, not the article, so raising one alone does nothing.
+   Text stays at 52rem below: it measured 104 characters a line, so the room goes to tables and code. */
+#nd-page,
+#nd-page > * {
+  max-width: none;
+}
+
+#nd-page :is(p, ul, ol, blockquote) {
+  max-width: 52rem;
+}
+
 /* Violet is always the live path, amber always an abandoned sibling - the one
    duality this package is about, so the pair carries meaning wherever it
    appears rather than decorating. :root holds light values; .dark overrides,
@@ -103,27 +135,20 @@ html > body[data-scroll-locked] {
   --color-fd-card: color-mix(in srgb, var(--surface) 35%, var(--ground) 65%);
 }
 
+/* Card frame, measured off ui.shadcn.com: 14px radius and a 1px ring rather than a border, so it
+   never adds layout width, plus no drop shadow. Padding is left to each usage. */
+.card {
+  border-radius: 0.875rem;
+  background-color: var(--color-fd-card);
+  box-shadow: 0 0 0 1px var(--line);
+}
+
 /* Registering these as theme fonts (rather than a one-off utility class) means
    the existing font-mono usage in InstallCommand picks up JetBrains Mono for
    free, with no change to that component. */
 @theme {
   --font-display: var(--font-bricolage), var(--font-sans);
   --font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", monospace;
-}
-
-/* Fumadocs sets these in @layer utilities at the same breakpoints (md, xl);
-   unlayered rules always beat layered ones regardless of specificity, so this
-   narrows both without touching the mobile drawer, which sizes itself alone. */
-@media (width >= 48rem) {
-  #nd-docs-layout {
-    --fd-sidebar-width: 220px;
-  }
-}
-
-@media (width >= 80rem) {
-  #nd-docs-layout {
-    --fd-toc-width: 200px;
-  }
 }
 
 /* Scroll reveal, progressive enhancement: the .reveal class is only ever added

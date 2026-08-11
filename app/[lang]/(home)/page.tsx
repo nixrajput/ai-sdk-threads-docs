@@ -22,7 +22,7 @@ export default async function HomePage(props: PageProps<"/[lang]">) {
         <FeatureGrid />
       </Reveal>
       <Reveal>
-        <section className="mx-auto flex max-w-3xl flex-col items-center gap-4 border-t border-(--line) px-4 py-8 text-center">
+        <section className="mx-auto flex max-w-(--site-width) flex-col items-center gap-4 border-t border-(--line) px-4 py-8 text-center">
           <p className="text-fd-muted-foreground text-sm">
             Your database. Your rows. No service to sign up for.
           </p>

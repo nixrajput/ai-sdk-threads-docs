@@ -6,7 +6,8 @@ import {
   DocsTitle,
   MarkdownCopyButton,
   ViewOptionsPopover,
-} from "fumadocs-ui/layouts/docs/page";
+  // Must match the layout: notebook's DocsPage refuses to render under layouts/docs and vice versa.
+} from "fumadocs-ui/layouts/notebook/page";
 import { notFound } from "next/navigation";
 import { getMDXComponents } from "@/components/mdx";
 import type { Metadata } from "next";
