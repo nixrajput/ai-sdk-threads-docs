@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { INSTALL_CMD } from "@/lib/shared";
 
 // State drives the icon, and the same state drives a live region: an icon swap alone announces
@@ -15,6 +15,9 @@ const LABEL: Record<Status, string> = {
 
 export function InstallCommand() {
   const [status, setStatus] = useState<Status>("idle");
+  // Clearing first stops an earlier timer wiping a newer result, and covers unmount mid-countdown.
+  const resetAt = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(resetAt.current), []);
 
   return (
     <div className="card flex items-center gap-3 py-2 pr-2 pl-4 font-mono text-sm">
@@ -32,7 +35,8 @@ export function InstallCommand() {
           } catch {
             setStatus("failed");
           }
-          setTimeout(() => setStatus("idle"), 1800);
+          clearTimeout(resetAt.current);
+          resetAt.current = setTimeout(() => setStatus("idle"), 1800);
         }}
         className="text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-foreground rounded-md p-2 transition-colors"
       >

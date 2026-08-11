@@ -172,7 +172,6 @@ html > body[data-scroll-locked] {
   }
 }
 
-/* Hover lift on anything card-shaped, and a ring that warms rather than jumps. */
 .card {
   transition:
     box-shadow 0.2s ease,
@@ -196,6 +195,22 @@ html > body[data-scroll-locked] {
 @media (width >= 48rem) {
   #nd-subnav > div {
     padding-inline: 1rem;
+  }
+}
+
+/* Utility-driven motion (the row hover, the card lift) is covered here in one place rather than rule
+   by rule; the keyframe animations above are already gated on no-preference. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .card-interactive:hover {
+    transform: none;
   }
 }
 
