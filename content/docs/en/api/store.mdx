@@ -62,7 +62,9 @@ Every operation sends a fixed number of statements, independent of how much data
 | `forkAt` | 4 |
 | `replaceMessage` | 6 |
 
-`loadMessages` stays at two - one select for the active leaf, one for the thread's rows - at depth 1 or depth 500, because the root-to-leaf path is walked in memory by [`orderPath`](#orderpathrows-activeleafid) rather than with a recursive CTE. `listThreads` stays at one statement for a deep page as well as the first. The counts are pinned by a test in the package (`test/queries.test.ts`), so an N+1 introduced anywhere fails CI, and they were confirmed unchanged against a real PostgreSQL 16 server as well as the in-process PGlite the suite uses.
+`loadMessages` stays at two - one select for the active leaf, one for the thread's rows - at depth 1 or depth 500, because the root-to-leaf path is walked in memory by [`orderPath`](#orderpathrows-activeleafid) rather than with a recursive CTE.
+
+These are the statements the query builder issues. The write paths run in a transaction, so on the wire they cost **two more** - `begin` and `commit` - which server logs confirm: one `appendMessages` sends `begin`, `select`, `insert`, `update`, `commit`. Budget five round trips for an append and six for a fork. `listThreads` stays at one statement for a deep page as well as the first. The counts are pinned by a test in the package (`test/queries.test.ts`), so an N+1 introduced anywhere fails CI, and they were confirmed unchanged against a real PostgreSQL 16 server as well as the in-process PGlite the suite uses.
 
 ## Messages
 
