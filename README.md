@@ -17,7 +17,7 @@
 [![PRs](https://img.shields.io/github/issues-pr/nixrajput/ai-sdk-threads-docs?label=PRs)][pulls]
 
 <strong>Next.js 16 &middot; Fumadocs &middot; i18n from day one &middot; code samples typechecked against the published package</strong><br>
-<sub>Every <code>ts</code> and <code>tsx</code> fence in these docs is extracted and compiled against <code>ai-sdk-threads</code> <strong>installed from npm</strong>, so a sample that stops matching the shipped package fails the build rather than misleading a reader. <strong>Eight checks gate a PR</strong> - six static, plus <code>check:routes</code> and <code>check:vitals</code> against a real <code>npm start</code>. The budgets are measured, not guessed: <strong>728.9 KB</strong> of JavaScript on the home route and <strong>795.1 KB</strong> on a docs route, verifiable with <code>npm run check:vitals</code>.</sub>
+<sub>Every <code>ts</code> and <code>tsx</code> fence in these docs is extracted and compiled against <code>ai-sdk-threads</code> <strong>installed from npm</strong>, so a sample that stops matching the shipped package fails the build rather than misleading a reader. <strong>Eight checks gate a PR</strong> - six static, plus <code>check:routes</code> and <code>check:vitals</code> against a real <code>npm start</code>. Its budgets come from measurement rather than aspiration, and <code>check:vitals</code> holds the current figures - a payload number in prose goes stale on the next dependency bump with nothing to catch it.</sub>
 
 <br />
 
