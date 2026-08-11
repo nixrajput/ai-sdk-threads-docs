@@ -195,7 +195,7 @@ export function Playground() {
 
   if (state === "failed") {
     return (
-      <div className="border-fd-border bg-fd-card rounded-lg border p-4">
+      <div className="card p-4">
         <p className="font-mono text-sm text-(--stale)">The demo could not start.</p>
         <p className="text-fd-muted-foreground mt-2 text-sm">
           It needs WebAssembly and IndexedDB, which a private window or a strict content blocker may
@@ -303,7 +303,7 @@ export function Playground() {
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="border-fd-border bg-fd-card rounded-lg border p-3">
+    <section className="card p-3">
       <p className="text-fd-muted-foreground mb-3 font-mono text-xs">{title}</p>
       {children}
     </section>

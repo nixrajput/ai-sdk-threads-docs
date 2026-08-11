@@ -88,7 +88,7 @@ export function ConvertPanel() {
             spellCheck={false}
             rows={14}
             aria-label="ModelMessage input"
-            className="border-fd-border bg-fd-card w-full rounded-lg border p-2 font-mono text-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--live)"
+            className="card w-full p-2 font-mono text-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--live)"
           />
         </div>
         <div>
@@ -96,7 +96,7 @@ export function ConvertPanel() {
             {output.ok ? "UIMessage[]" : "threw"}
           </p>
           <pre
-            className="border-fd-border bg-fd-card h-full max-h-88 overflow-auto rounded-lg border p-2 font-mono text-xs"
+            className="card h-full max-h-88 overflow-auto p-2 font-mono text-xs"
             style={{ color: output.ok ? undefined : "var(--stale)" }}
           >
             <code>{output.text}</code>

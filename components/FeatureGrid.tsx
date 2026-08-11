@@ -29,22 +29,23 @@ const FEATURES = [
 
 export function FeatureGrid() {
   return (
-    <section className="mx-auto w-full max-w-(--site-width) border-t border-(--line) px-4 py-12">
-      <p className="font-display text-xs font-semibold tracking-[0.2em] text-(--muted) uppercase">
-        Coverage
-      </p>
-      <h2 className="mt-2 text-2xl font-bold tracking-tight">What ai-sdk-threads gives you</h2>
-      <dl className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {FEATURES.map((f) => (
-          <div
-            key={f.title}
-            className="card hover:bg-fd-accent/40 flex flex-col gap-2 p-4 transition-colors"
-          >
-            <dt className="text-base font-medium">{f.title}</dt>
-            <dd className="text-fd-muted-foreground text-sm">{f.body}</dd>
-          </div>
-        ))}
-      </dl>
+    /* The one muted band on the page: it separates this block from the sections around it, which is
+       what the rules between sections were doing less quietly. */
+    <section className="bg-fd-muted w-full px-4 py-16 sm:py-20">
+      <div className="mx-auto w-full max-w-(--content-width)">
+        <p className="font-display text-xs font-semibold tracking-[0.2em] text-(--muted) uppercase">
+          Coverage
+        </p>
+        <h2 className="mt-2 text-2xl font-bold tracking-tight">What ai-sdk-threads gives you</h2>
+        <dl className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {FEATURES.map((f) => (
+            <div key={f.title} className="card card-interactive flex flex-col gap-2 p-5">
+              <dt className="text-base font-medium">{f.title}</dt>
+              <dd className="text-fd-muted-foreground text-sm leading-relaxed">{f.body}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
     </section>
   );
 }

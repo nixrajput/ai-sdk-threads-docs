@@ -68,19 +68,20 @@ html > body[data-scroll-locked] {
    specificity - so redeclaring the same var names here, after the imports,
    takes over both mechanisms without an !important fight. */
 :root {
-  --ground: #f7f5fb;
-  --surface: #ece8f2;
-  --line: #dad2e4;
+  --ground: #ffffff;
+  --surface: #f5f5f5;
+  --line: #e5e5e5;
+  --pass: #12875e;
   --live: #5b3fe0;
   --stale: #a15a10;
-  --paper: #171320;
-  --muted: #6b6478;
+  --paper: #0a0a0a;
+  --muted: #737373;
 
   --color-fd-background: var(--ground);
   --color-fd-foreground: var(--paper);
-  --color-fd-card: var(--surface);
+  --color-fd-card: var(--ground);
   --color-fd-card-foreground: var(--paper);
-  --color-fd-popover: var(--surface);
+  --color-fd-popover: var(--ground);
   --color-fd-popover-foreground: var(--paper);
   --color-fd-muted: var(--surface);
   --color-fd-muted-foreground: var(--muted);
@@ -93,13 +94,14 @@ html > body[data-scroll-locked] {
 }
 
 .dark {
-  --ground: #141118;
-  --surface: #1c1822;
-  --line: #2b2533;
+  --ground: #080808;
+  --surface: #111111;
+  --line: rgb(255 255 255 / 0.1);
+  --pass: #5ee6a8;
   --live: #9b8cff;
   --stale: #f0a868;
-  --paper: #e9e6ef;
-  --muted: #8b8496;
+  --paper: #fafafa;
+  --muted: #a3a3a3;
 
   --color-fd-background: var(--ground);
   --color-fd-foreground: var(--paper);
@@ -141,6 +143,52 @@ html > body[data-scroll-locked] {
   border-radius: 0.875rem;
   background-color: var(--color-fd-card);
   box-shadow: 0 0 0 1px var(--line);
+}
+
+/* Cards stretched to ~460px each at 1920 because the grid inherited the full-bleed section width.
+   The shell stays full-bleed; content that reads as a row of cards or a paragraph sits in this. */
+:root {
+  --content-width: 84rem;
+}
+
+/* Motion, one system rather than scattered effects, and all of it inside this query so a reduced-motion
+   visitor gets the final state with no animation and nothing ever animates from invisible. */
+@media (prefers-reduced-motion: no-preference) {
+  /* On load and on route change: Next remounts page content, so this replays per navigation. */
+  .enter {
+    animation: enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: var(--enter-delay, 0ms);
+  }
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Hover lift on anything card-shaped, and a ring that warms rather than jumps. */
+.card {
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.card-interactive:hover {
+  box-shadow: 0 0 0 1px var(--muted);
+  transform: translateY(-2px);
+}
+
+/* Fumadocs' own controls and ours share one focus treatment. */
+:where(a, button, [role="button"], summary):focus-visible {
+  outline: 2px solid var(--color-fd-ring);
+  outline-offset: 2px;
 }
 
 /* Registering these as theme fonts (rather than a one-off utility class) means

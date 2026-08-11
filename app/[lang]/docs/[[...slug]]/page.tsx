@@ -33,7 +33,7 @@ export default async function Page(props: PageProps<"/[lang]/docs/[[...slug]]">)
           githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${page.path}`}
         />
       </div>
-      <DocsBody>
+      <DocsBody className="enter">
         <MDX
           components={getMDXComponents({
             a: createRelativeLink(source, page),
