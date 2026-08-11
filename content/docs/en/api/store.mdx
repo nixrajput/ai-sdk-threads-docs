@@ -48,6 +48,22 @@ do {
 
 The timestamp columns are deliberately millisecond precision for this reason - see [Schema](/en/docs/api/schema#why-millisecond-precision).
 
+Measured rather than asserted: over 4,000 threads, page 400 came back at 1.00x the median of page 1.
+
+## Round trips
+
+Every operation sends a fixed number of statements, independent of how much data is involved. That matters more than milliseconds, because round trips multiplied by your database's latency is the real cost:
+
+| Operation | Statements |
+| --- | --- |
+| `getThread`, `listThreads`, `createThread` | 1 |
+| `loadMessages`, `getTree`, `siblingsOf`, `setActiveLeaf` | 2 |
+| `appendMessages`, `regenerateFrom` | 3 |
+| `forkAt` | 4 |
+| `replaceMessage` | 6 |
+
+`loadMessages` stays at two - one select for the active leaf, one for the thread's rows - at depth 1 or depth 500, because the root-to-leaf path is walked in memory by [`orderPath`](#orderpathrows-activeleafid) rather than with a recursive CTE. The counts are pinned by a test in the package (`test/queries.test.ts`), so an N+1 introduced anywhere fails CI, and they were confirmed unchanged against a real PostgreSQL 16 server as well as the in-process PGlite the suite uses.
+
 ## Messages
 
 | Method | Returns | Notes |
@@ -57,7 +73,7 @@ The timestamp columns are deliberately millisecond precision for this reason - s
 
 `appendMessages` uses each `UIMessage`'s own `id` as the row's primary key, because `useChat` already owns message ids. Messages are chained to the end of the thread and the thread's `activeLeafId` moves to the last one, inside one transaction that locks the thread row - so two concurrent appends cannot interleave.
 
-`loadMessages` returns `[]` for a thread with no messages yet. Before returning, rows pass through the SDK's own `validateUIMessages`, so a row that no longer matches the SDK's shape fails loudly here rather than in your renderer.
+`loadMessages` returns `[]` for a thread with no messages yet, but **throws** for a thread that does not exist - two different states, and a client-supplied chat id that has never been posted to is the second one. Server-rendering a page from a fresh id therefore needs a `getThread` check first (see [Getting started](/en/docs/getting-started)), or the first render is a 500. Before returning, rows pass through the SDK's own `validateUIMessages`, so a row that no longer matches the SDK's shape fails loudly here rather than in your renderer.
 
 ```ts fragment
 const messages = await store.loadMessages(threadId);
