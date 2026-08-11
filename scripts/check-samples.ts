@@ -18,6 +18,11 @@ import { db } from "./db";
 export const store = createThreadStore(db);
 `;
 
+// The page sample checks thread ownership before rendering, so it needs an auth helper to
+// resolve. Readers substitute their own.
+const AUTH_STUB = `export declare function currentUserId(): Promise<string | null>;
+`;
+
 // The getting-started page shows a server page importing its own client component, so
 // that sibling module has to exist for the sample to resolve.
 const CHAT_STUB = `import type { UIMessage } from "ai";
@@ -48,6 +53,7 @@ mkdirSync(OUT, { recursive: true });
 writeFileSync(join(OUT, "db.ts"), DB_STUB);
 writeFileSync(join(OUT, "threads.ts"), THREADS_STUB);
 writeFileSync(join(OUT, "chat.tsx"), CHAT_STUB);
+writeFileSync(join(OUT, "auth.ts"), AUTH_STUB);
 
 // Samples use top-level await, which is only valid in a module; without this the
 // directory has no package type and the files are treated as scripts.

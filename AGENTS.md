@@ -45,7 +45,7 @@ npm run dev   # local dev server
 The gate, run by CI and `.githooks/pre-push`:
 
 ```bash
-npm run lint && npm run types:check && npm run check:samples && npm run format:check && npm run build
+npm run lint && npm run types:check && npm run check:samples && npm run format:check && npm run check:spell && npm run build
 ```
 
 Plus two checks that need a running server (`npm start`, then `BASE_URL=... npm run check:routes` and `npm run check:vitals`). CI runs both against one server rather than starting `next start` twice.

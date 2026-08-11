@@ -16,7 +16,8 @@
     // baseUrl: it is deprecated in TS 6, and paths resolve relative to this file.
     "paths": {
       "@/lib/threads": ["./.samples/threads.ts"],
-      "@/lib/db": ["./.samples/db.ts"]
+      "@/lib/db": ["./.samples/db.ts"],
+      "@/lib/auth": ["./.samples/auth.ts"]
     }
   },
   "include": [".samples/**/*.ts", ".samples/**/*.tsx"]

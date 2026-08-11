@@ -70,14 +70,22 @@ Read the thread on the server and hand it straight to `useChat`:
 
 ```tsx
 // app/chat/[id]/page.tsx
+import { notFound } from "next/navigation";
+import { currentUserId } from "@/lib/auth";
 import { store } from "@/lib/threads";
 import { Chat } from "./chat";
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  // A brand-new chat id has no thread until the first POST, and loadMessages throws for one
-  // that does not exist - so check before loading, or the first render of a new chat is a 500.
+  const userId = await currentUserId();
   const thread = await store.getThread(id);
+
+  // The id comes from the URL, so the page needs the same ownership check the route does:
+  // `authorize` guards chatHandler, not this render. Answer 404 rather than 403, so an
+  // unauthorized reader cannot tell an existing thread from a missing one.
+  if (thread && thread.userId !== userId) notFound();
+
+  // loadMessages throws for a thread that does not exist, and a fresh chat id is exactly that.
   const messages = thread ? await store.loadMessages(id) : [];
   return <Chat id={id} initialMessages={messages} />;
 }
@@ -99,7 +107,7 @@ export function Chat({ id, initialMessages }: { id: string; initialMessages: UIM
 
 ## Create a thread before the first message
 
-If you would rather the page never meet an id without a thread behind it, create the thread server-side and redirect to it. Then the `getThread` check above always finds one, and the first render has history to show:
+If you would rather the page never meet an id without a thread behind it, create the thread server-side and redirect to it. The thread starts empty, so the first render still shows no messages - but it renders without the missing-thread case:
 
 ```ts fragment
 const thread = await store.createThread({ userId: "user_123", title: "New chat" });
