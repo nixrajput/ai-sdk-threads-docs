@@ -48,7 +48,7 @@ function Pane({
   accent: string;
 }) {
   return (
-    <div className="border-fd-border bg-fd-card flex flex-col rounded-lg border">
+    <div className="card flex flex-col sm:row-span-3 sm:grid sm:grid-rows-subgrid">
       <div className="border-fd-border flex items-baseline justify-between gap-2 border-b px-3 py-2">
         <span className="font-mono text-xs" style={{ color: accent }}>
           {label}
@@ -60,38 +60,38 @@ function Pane({
       <pre className="overflow-x-auto px-3 py-3 font-mono text-[0.7rem] leading-relaxed">
         <code>{code}</code>
       </pre>
-      <p className="text-fd-muted-foreground border-fd-border mt-auto border-t px-3 py-2 text-xs">
-        {note}
-      </p>
+      <p className="text-fd-muted-foreground border-fd-border border-t px-3 py-2 text-xs">{note}</p>
     </div>
   );
 }
 
 export function BoilerplateContrast() {
   return (
-    <section className="mx-auto max-w-3xl px-4 pb-12">
-      <p className="font-display text-xs font-semibold tracking-[0.2em] text-(--muted) uppercase">
-        The route
-      </p>
-      <h2 className="mt-2 text-2xl font-bold tracking-tight">Same behaviour, one call</h2>
-      <p className="text-fd-muted-foreground mt-2 text-sm">
-        Both of these are in the docs and both typecheck against the published package on every
-        build. The left one is what the persistence pattern asks you to maintain per app.
-      </p>
+    <section className="w-full px-4 py-16 sm:py-20">
+      <div className="mx-auto w-full max-w-(--content-width)">
+        <p className="font-display text-xs font-semibold tracking-[0.2em] text-(--muted) uppercase">
+          The route
+        </p>
+        <h2 className="mt-2 text-2xl font-bold tracking-tight">Same behaviour, one call</h2>
+        <p className="text-fd-muted-foreground mt-2 text-sm">
+          Both of these are in the docs and both typecheck against the published package on every
+          build. The left one is what the persistence pattern asks you to maintain per app.
+        </p>
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-2">
-        <Pane
-          label="by hand"
-          accent="var(--stale)"
-          code={BY_HAND}
-          note="Miss generateMessageId and replies store with an empty id. Register only onEnd and nothing persists on ai 6. Forget to filter and every turn duplicates rows."
-        />
-        <Pane
-          label="ai-sdk-threads"
-          accent="var(--live)"
-          code={WITH_HANDLER}
-          note="Plus authorization, branching, and the truncated-reply handling the left pane does not attempt."
-        />
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 sm:grid-rows-[auto_1fr_auto]">
+          <Pane
+            label="by hand"
+            accent="var(--stale)"
+            code={BY_HAND}
+            note="Miss generateMessageId and replies store with an empty id. Register only onEnd and nothing persists on ai 6. Forget to filter and every turn duplicates rows."
+          />
+          <Pane
+            label="ai-sdk-threads"
+            accent="var(--live)"
+            code={WITH_HANDLER}
+            note="Plus authorization, branching, and the truncated-reply handling the left pane does not attempt."
+          />
+        </div>
       </div>
     </section>
   );

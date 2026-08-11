@@ -13,7 +13,6 @@
 
 # misc
 .DS_Store
-*.pem
 /.pnp
 .pnp.js
 npm-debug.log*
@@ -21,7 +20,6 @@ yarn-debug.log*
 yarn-error.log*
 
 # others
-.env*.local
 .vercel
 next-env.d.ts
 
@@ -38,3 +36,16 @@ next-env.d.ts
 
 # Playwright MCP scratch output (snapshots, console logs)
 .playwright-mcp/
+# Secrets: every env variant, keys and certificates. A plain .env was not covered before, and it is
+# the file most likely to hold a real token.
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cert
+secrets/

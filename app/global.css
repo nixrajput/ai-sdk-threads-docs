@@ -22,6 +22,38 @@ html > body[data-scroll-locked] {
   --removed-body-scroll-bar-size: 0px !important;
 }
 
+/* Full-bleed shell, bounded text - the shape ui.shadcn.com uses (its sections span the viewport,
+   its h1 stops at 896px). The nav reads --site-width too, so the two cannot drift apart again:
+   the sections were 768px under a 1400px nav. */
+:root {
+  --site-width: 100%;
+  --site-measure: 56rem;
+}
+
+/* The nav and the content wrapper each declare this locally (the wrapper caps its children with
+   `*:max-w-(--fd-layout-width)`), so both need overriding or the page stays in a 1400px band. */
+#nd-home-layout,
+#nd-home-layout main {
+  --fd-layout-width: var(--site-width);
+}
+
+/* Fumadocs centres the docs shell in a 97rem band, which spends 184px a side on gutters at 1920px.
+   Full-bleed instead, so the sidebar and table of contents sit against the viewport edges. */
+#nd-notebook-layout {
+  --fd-layout-width: 100%;
+}
+
+/* The notebook layout caps each direct child, not the article, so raising one alone does nothing.
+   Text stays at 52rem below: it measured 104 characters a line, so the room goes to tables and code. */
+#nd-page,
+#nd-page > * {
+  max-width: none;
+}
+
+#nd-page :is(p, ul, ol, blockquote) {
+  max-width: 52rem;
+}
+
 /* Violet is always the live path, amber always an abandoned sibling - the one
    duality this package is about, so the pair carries meaning wherever it
    appears rather than decorating. :root holds light values; .dark overrides,
@@ -36,19 +68,20 @@ html > body[data-scroll-locked] {
    specificity - so redeclaring the same var names here, after the imports,
    takes over both mechanisms without an !important fight. */
 :root {
-  --ground: #f7f5fb;
-  --surface: #ece8f2;
-  --line: #dad2e4;
+  --ground: #ffffff;
+  --surface: #f5f5f5;
+  --line: #e5e5e5;
+  --pass: #12875e;
   --live: #5b3fe0;
   --stale: #a15a10;
-  --paper: #171320;
-  --muted: #6b6478;
+  --paper: #0a0a0a;
+  --muted: #737373;
 
   --color-fd-background: var(--ground);
   --color-fd-foreground: var(--paper);
-  --color-fd-card: var(--surface);
+  --color-fd-card: var(--ground);
   --color-fd-card-foreground: var(--paper);
-  --color-fd-popover: var(--surface);
+  --color-fd-popover: var(--ground);
   --color-fd-popover-foreground: var(--paper);
   --color-fd-muted: var(--surface);
   --color-fd-muted-foreground: var(--muted);
@@ -61,13 +94,14 @@ html > body[data-scroll-locked] {
 }
 
 .dark {
-  --ground: #141118;
-  --surface: #1c1822;
-  --line: #2b2533;
+  --ground: #080808;
+  --surface: #111111;
+  --line: rgb(255 255 255 / 0.1);
+  --pass: #5ee6a8;
   --live: #9b8cff;
   --stale: #f0a868;
-  --paper: #e9e6ef;
-  --muted: #8b8496;
+  --paper: #fafafa;
+  --muted: #a3a3a3;
 
   --color-fd-background: var(--ground);
   --color-fd-foreground: var(--paper);
@@ -103,27 +137,89 @@ html > body[data-scroll-locked] {
   --color-fd-card: color-mix(in srgb, var(--surface) 35%, var(--ground) 65%);
 }
 
+/* Card frame, measured off ui.shadcn.com: 14px radius and a 1px ring rather than a border, so it
+   never adds layout width, plus no drop shadow. Padding is left to each usage. */
+.card {
+  border-radius: 0.875rem;
+  background-color: var(--color-fd-card);
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+/* Cards stretched to ~460px each at 1920 because the grid inherited the full-bleed section width.
+   The shell stays full-bleed; content that reads as a row of cards or a paragraph sits in this. */
+:root {
+  --content-width: 84rem;
+}
+
+/* Motion, one system rather than scattered effects, and all of it inside this query so a reduced-motion
+   visitor gets the final state with no animation and nothing ever animates from invisible. */
+@media (prefers-reduced-motion: no-preference) {
+  /* On load and on route change: Next remounts page content, so this replays per navigation. */
+  .enter {
+    animation: enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: var(--enter-delay, 0ms);
+  }
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.card {
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.card-interactive:hover {
+  box-shadow: 0 0 0 1px var(--muted);
+  transform: translateY(-2px);
+}
+
+/* Fumadocs' own controls and ours share one focus treatment. */
+:where(a, button, [role="button"], summary):focus-visible {
+  outline: 2px solid var(--color-fd-ring);
+  outline-offset: 2px;
+}
+
+/* Fumadocs pads the docs header row to 24px from md up, while the home header and every body
+   container sit at 16px - so the logo jumped 8px when crossing into the docs. */
+@media (width >= 48rem) {
+  #nd-subnav > div {
+    padding-inline: 1rem;
+  }
+}
+
+/* Utility-driven motion (the row hover, the card lift) is covered here in one place rather than rule
+   by rule; the keyframe animations above are already gated on no-preference. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .card-interactive:hover {
+    transform: none;
+  }
+}
+
 /* Registering these as theme fonts (rather than a one-off utility class) means
    the existing font-mono usage in InstallCommand picks up JetBrains Mono for
    free, with no change to that component. */
 @theme {
   --font-display: var(--font-bricolage), var(--font-sans);
   --font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", monospace;
-}
-
-/* Fumadocs sets these in @layer utilities at the same breakpoints (md, xl);
-   unlayered rules always beat layered ones regardless of specificity, so this
-   narrows both without touching the mobile drawer, which sizes itself alone. */
-@media (width >= 48rem) {
-  #nd-docs-layout {
-    --fd-sidebar-width: 220px;
-  }
-}
-
-@media (width >= 80rem) {
-  #nd-docs-layout {
-    --fd-toc-width: 200px;
-  }
 }
 
 /* Scroll reveal, progressive enhancement: the .reveal class is only ever added

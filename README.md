@@ -17,11 +17,11 @@
 [![PRs](https://img.shields.io/github/issues-pr/nixrajput/ai-sdk-threads-docs?label=PRs)][pulls]
 
 <strong>Next.js 16 &middot; Fumadocs &middot; i18n from day one &middot; code samples typechecked against the published package</strong><br>
-<sub>Every <code>ts</code> and <code>tsx</code> fence in these docs is extracted and compiled against <code>ai-sdk-threads</code> <strong>installed from npm</strong>, so a sample that stops matching the shipped package fails the build rather than misleading a reader. Three checks gate a PR beyond lint and types: <code>check:samples</code>, <code>check:routes</code>, and <code>check:vitals</code>.</sub>
+<sub>Every <code>ts</code> and <code>tsx</code> fence in these docs is extracted and compiled against <code>ai-sdk-threads</code> <strong>installed from npm</strong>, so a sample that stops matching the shipped package fails the build rather than misleading a reader. <strong>Eight checks gate a PR</strong> - six static, plus <code>check:routes</code> and <code>check:vitals</code> against a real <code>npm start</code>. Its budgets come from measurement rather than aspiration, and <code>check:vitals</code> holds the current figures - a payload number in prose goes stale on the next dependency bump with nothing to catch it.</sub>
 
 <br />
 
-**[Live site][site]** &middot; [Getting started][docs-start] &middot; [API reference][docs-api] &middot; [Playground][docs-playground] &middot; [llms.txt][llms]
+**[Live site][site]** &middot; [Getting started][docs-start] &middot; [API reference][docs-api] &middot; [Playground][docs-playground]
 
 <sub><b>AI agents / LLMs:</b> this documentation is machine-readable at <a href="https://ai-sdk-threads.nixrajput.com/llms.txt"><code>llms.txt</code></a>, or as one blob at <a href="https://ai-sdk-threads.nixrajput.com/llms-full.txt"><code>llms-full.txt</code></a>.</sub>
 
@@ -110,13 +110,14 @@ Three structural details that are easy to trip over:
 
 ## The checks a PR must pass
 
-CI runs exactly this set, and `.githooks/pre-push` runs the first five locally if you opt in (`git config core.hooksPath .githooks`):
+CI runs exactly this set, and `.githooks/pre-push` runs the six static ones locally if you opt in (`git config core.hooksPath .githooks`):
 
 ```bash
 npm run lint          # eslint
 npm run types:check   # next typegen + tsc --noEmit
 npm run check:samples # extract + typecheck docs code samples
 npm run format:check  # prettier --check
+npm run check:spell   # cspell over source and prose
 npm run build         # next build (prebuild copies the PGlite assets)
 npm run check:routes  # end-to-end route check, against `npm start`
 npm run check:vitals  # per-route payload and response-time budgets
@@ -201,7 +202,6 @@ This site is MIT licensed and free to use, always. If it helps you get more out 
 
 [ci]: https://github.com/nixrajput/ai-sdk-threads-docs/actions/workflows/ci.yml
 [site]: https://ai-sdk-threads.nixrajput.com
-[llms]: https://ai-sdk-threads.nixrajput.com/llms.txt
 [docs-start]: https://ai-sdk-threads.nixrajput.com/en/docs/getting-started
 [docs-api]: https://ai-sdk-threads.nixrajput.com/en/docs/api/chat-handler
 [docs-playground]: https://ai-sdk-threads.nixrajput.com/en/playground

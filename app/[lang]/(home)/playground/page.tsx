@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function PlaygroundPage() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12">
+    <main className="mx-auto w-full max-w-(--site-width) px-4 py-12">
       <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">Playground</h1>
       <p className="text-fd-muted-foreground mt-3">
         Postgres compiled to WebAssembly, in this tab, driven by the published package. Regenerate
