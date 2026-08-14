@@ -33,7 +33,7 @@ Zero runtime dependencies: `ai`, `drizzle-orm` and `resumable-stream` are peers,
 
 - **Not a chat UI.** ai-elements and assistant-ui own that; this stores what they render.
 - **Not an agent framework or a memory system.** No tool orchestration, no vector search, no summarisation.
-- **Not a hosted service.** There is no tier to upgrade to and no per-seat pricing. If you want a managed layer with sync and analytics, assistant-ui's cloud and Convex both do that well, and this is the self-hosted answer instead.
+- **Not a hosted service.** Your database by default. **Everything the package does today stays free and MIT** - the store, the route handlers, `convertToUIMessages`, branching, resumable streams, both adapters and the migration tooling. If a managed layer ever exists it could only add cross-device sync and hosted search over conversations, never take any of this back. For a managed layer today, assistant-ui's cloud and Convex both do it well.
 - **Not for `ai` 4 or older.** `ai` 5 was a rewrite; the supported range is `>=6 <8`.
 
 ## Next
