@@ -79,7 +79,7 @@ const pill = html.replace(/<!-- -->/g, "").match(/v(\d+\.\d+\.\d+) on npm/);
 if (pill) console.log(`PASS: home page shows the package version (v${pill[1]})`);
 else console.log("WARN: home page shows no version pill - registry fetch failed, or a regression");
 
-for (const path of ["/en/docs", "/en/docs/getting-started"]) await expectOk(path);
+for (const path of ["/en/docs", "/en/docs/getting-started", "/en/docs/api"]) await expectOk(path);
 console.log("PASS: docs skeleton pages render");
 
 const API_PAGES = [
@@ -133,3 +133,20 @@ for (const path of [
 console.log("PASS: non-localized routes serve without a locale redirect");
 
 if (PENDING.size > 0) console.log(`NOTE: ${PENDING.size} route(s) skipped as not yet built`);
+
+// Vercel serves the analytics script only in production, so a local 404 is expected
+// and only the redirect can be checked here.
+{
+  const path = "/_vercel/insights/script.js";
+  const r = await fetch(`${base}${path}`, { redirect: "manual" });
+  const location = r.headers.get("location") ?? "";
+  if (location.includes("/_vercel")) {
+    console.error(
+      `FAIL: ${path} redirected to ${location}. Vercel's edge serves this path, so a ` +
+        "locale prefix 404s it and Web Analytics collects nothing. Keep /_vercel in " +
+        "NON_LOCALIZED_ROUTES in proxy.ts.",
+    );
+    process.exit(1);
+  }
+}
+console.log("PASS: analytics script not locale-redirected");

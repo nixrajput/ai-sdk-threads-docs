@@ -11,16 +11,27 @@ export const metadata: Metadata = {
 
 export default function PlaygroundPage() {
   return (
-    <main className="mx-auto w-full max-w-(--site-width) px-4 py-12">
-      <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">Playground</h1>
-      <p className="text-fd-muted-foreground mt-3">
-        Postgres compiled to WebAssembly, in this tab, driven by the published package. Regenerate
-        an answer and the old one stays as a sibling; switch between them and the live path moves.
-      </p>
+    <main>
+      {/* The same shell every home section uses: full-bleed, content bounded at --content-width,
+          eyebrow above the heading, and the section's own vertical rhythm. */}
+      <section className="w-full px-4 py-16 sm:py-20">
+        <div className="mx-auto w-full max-w-(--content-width)">
+          <p className="font-display text-xs font-semibold tracking-[0.2em] text-(--muted) uppercase">
+            Playground
+          </p>
+          <h1 className="mt-2 text-2xl font-bold tracking-tight">A real Postgres, in this tab</h1>
+          <p className="text-fd-muted-foreground mt-2 text-sm">
+            Postgres compiled to WebAssembly, driven by the published package rather than a
+            simulation. Regenerate an answer and the old one stays as a sibling; switch between them
+            and the live path moves. Every call it makes, and the rows it writes, are shown as they
+            happen.
+          </p>
 
-      <div className="mt-8">
-        <PlaygroundLoader />
-      </div>
+          <div className="mt-8">
+            <PlaygroundLoader />
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
