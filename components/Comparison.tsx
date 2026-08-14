@@ -57,7 +57,7 @@ const ROWS: {
     cells: {
       scope: "UI plus hosted persistence",
       where: "Their infrastructure",
-      branching: "No",
+      branching: "Tracked in the runtime; storage undocumented",
       migration: "Their concern rather than yours",
       ui: "A full component library",
       hosted: "Sync, search and analytics",
@@ -71,7 +71,7 @@ const ROWS: {
     cells: {
       scope: "A whole reactive backend",
       where: "Their platform",
-      branching: "No",
+      branching: "Yours to model",
       migration: "Yours to write",
       ui: "No",
       hosted: "Reactive sync, search and functions",

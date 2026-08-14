@@ -35,7 +35,7 @@ A `Thread` is `{ id, userId, title, visibility, activeLeafId, metadata, createdA
 
 ### Keyset pagination
 
-`listThreads` pages with a keyset cursor over `(createdAt, id)`, not `OFFSET`, so page 400 costs what page 1 does. Pass `nextCursor` back and stop when it comes back `undefined`:
+`listThreads` pages with a keyset cursor over `(createdAt, id)`, not `OFFSET`. Pass `nextCursor` back and stop when it comes back `undefined`:
 
 ```ts fragment
 let cursor: string | undefined;
@@ -48,7 +48,24 @@ do {
 
 The timestamp columns are deliberately millisecond precision for this reason - see [Schema](/en/docs/api/schema#why-millisecond-precision).
 
-Measured rather than asserted: over 4,000 threads, page 400 came back at 1.00x the median of page 1.
+Pinned and measured, not asserted. [`test/queries.test.ts`](https://github.com/nixrajput/ai-sdk-threads/blob/main/test/queries.test.ts) walks every cursor page of a full traversal and requires each to cost one statement, and it pins the *shape* of the predicate too - a row-value comparison, `(created_at, id) < ($1, $2)`, which Postgres can use as an index bound.
+
+That shape is the whole property, and the difference is not subtle. The classic `created_at < $1 OR (created_at = $1 AND id < $2)` form costs one statement too, but Postgres can only use it as an index *filter*: it walks the user's range from the top and discards until the predicate passes, so the cost grows with depth. A row-value comparison is an index *bound*, so it does not.
+
+| Rows before the cursor | `created_at < $1 OR (…)` | `(created_at, id) < ($1, $2)` |
+| ---------------------- | ------------------------ | ----------------------------- |
+| ~0                     | 0.029 ms                 | 0.043 ms                      |
+| ~5,000                 | 1.75 ms                  | 0.031 ms                      |
+| ~50,000                | **9.22 ms**              | 0.012 ms                      |
+| ~90,000                | **8.09 ms**              | 0.014 ms                      |
+
+<Callout title="How that was measured">
+  `EXPLAIN (ANALYZE)` on Postgres 16, 100,000 threads, pages of 20, statistics refreshed before
+  timing. End to end through the store rather than at the server, a page 50,000 rows deep came back
+  at **1.13x** the first page and 90,000 rows deep at the same 1.13x - medians over six and three
+  runs. [The harness is in the repo](https://github.com/nixrajput/ai-sdk-threads/blob/main/bench/paging.measure.ts),
+  so you can re-run all of it: `PG_URL=… npx tsx bench/paging.measure.ts`.
+</Callout>
 
 ## Round trips
 
