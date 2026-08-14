@@ -48,7 +48,7 @@ do {
 
 The timestamp columns are deliberately millisecond precision for this reason - see [Schema](/en/docs/api/schema#why-millisecond-precision).
 
-Measured rather than asserted: over 4,000 threads, page 400 came back at 1.00x the median of page 1.
+Pinned rather than asserted: [`test/queries.test.ts`](https://github.com/nixrajput/ai-sdk-threads/blob/main/test/queries.test.ts) pages past the first result set by cursor and requires the deeper page to cost the same single statement, so an `OFFSET` scan creeping in fails CI.
 
 ## Round trips
 

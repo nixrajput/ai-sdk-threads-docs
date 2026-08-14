@@ -202,8 +202,8 @@ export function BranchTree({ lang }: { lang: string }) {
         <p className="text-fd-muted-foreground mt-4 text-xs">
           An illustration of the stored shape - the buttons are{" "}
           <code className="font-mono">siblingsOf</code> plus{" "}
-          <code className="font-mono">setActiveLeaf</code>, and nothing else in the ecosystem
-          persists this tree (
+          <code className="font-mono">setActiveLeaf</code>, and the AI SDK itself still has no
+          answer for the tree (
           <a
             href="https://github.com/vercel/ai/issues/2929"
             className="underline hover:text-(--live)"

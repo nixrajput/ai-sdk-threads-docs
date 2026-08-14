@@ -5,7 +5,7 @@ description: Edit or regenerate a message and the old version survives as a sibl
 
 Messages have always formed a tree here - `parentId` on every row, `activeLeafId` on the thread. These are the operations that use it. **Nothing is ever deleted**: editing or regenerating leaves the old version in place as a sibling.
 
-The UI for this exists in ai-elements; the storage behind it does not exist anywhere else ([vercel/ai#2929](https://github.com/vercel/ai/issues/2929), open since 2024).
+The UI for this exists in ai-elements; the AI SDK has no storage behind it ([vercel/ai#2929](https://github.com/vercel/ai/issues/2929), open since September 2024). Elsewhere, assistant-ui tracks branches in its client runtime and `@ably/ai-transport` keeps a tree on its realtime channels - both leave durable storage to you, which is the part this owns.
 
 <Callout>
   Every method on this page runs in the [playground](/en/playground) against a real Postgres in
