@@ -86,7 +86,7 @@ const ROWS: {
       scope: "An app to fork",
       where: "Yours",
       branching: "No",
-      migration: "A second Message_v2 table, by hand",
+      migration: "A new Message_v2 table, backfilled by hand",
       ui: "A whole app, already styled",
       hosted: "No",
       cost: "Free, fork-and-own",
