@@ -6,13 +6,26 @@ export async function ProjectStats() {
   // Every live cell is gated on a nonzero value, not merely a present one: a "0" in display
   // type is dead weight, and each cell appears on its own once its number means something.
   const cells: { label: string; value: string }[] = [];
-  if (stats.suiteTests)
-    cells.push({ label: "tests in the suite", value: String(stats.suiteTests) });
-  if (stats.totalDownloads) {
-    cells.push({ label: "downloads all-time", value: stats.totalDownloads.toLocaleString() });
+  if (stats.monthlyDownloads) {
+    cells.push({ label: "downloads a month", value: stats.monthlyDownloads.toLocaleString() });
   }
-  if (stats.stars) cells.push({ label: "GitHub stars", value: String(stats.stars) });
-  if (stats.forks) cells.push({ label: "forks", value: String(stats.forks) });
+  if (stats.unpackedBytes) {
+    cells.push({
+      label: "unpacked size",
+      value: `${Math.round(stats.unpackedBytes / 1024).toLocaleString()} KB`,
+    });
+  }
+  if (stats.stars) {
+    cells.push({
+      label: stats.stars === 1 ? "GitHub star" : "GitHub stars",
+      value: String(stats.stars),
+    });
+  }
+  if (stats.forks) {
+    cells.push({ label: stats.forks === 1 ? "fork" : "forks", value: String(stats.forks) });
+  }
+
+  const contributors = stats.contributors ?? [];
 
   return (
     <section id="project" className="w-full px-4 py-16 sm:py-20">
@@ -33,30 +46,36 @@ export async function ProjectStats() {
           ))}
         </dl>
 
-        {stats.contributors && stats.contributors.length > 0 && (
-          <div className="mt-10">
-            <p className="text-fd-muted-foreground text-sm">
-              {stats.contributors.length === 1
-                ? "1 contributor"
-                : `${stats.contributors.length} contributors`}
+        {/* w-fit so the card hugs its contributors rather than stranding one avatar in the middle
+            of a full-width panel; max-w-full lets a longer list wrap instead of overflowing. */}
+        {contributors.length > 0 && (
+          <div className="card mx-auto mt-4 flex w-fit max-w-full flex-col items-center gap-6 p-8 text-center">
+            <p className="font-display text-xs font-semibold tracking-[0.2em] text-(--muted) uppercase">
+              {contributors.length === 1 ? "Contributor" : `${contributors.length} contributors`}
             </p>
-            <ul className="mt-3 flex flex-wrap gap-2">
-              {stats.contributors.map((c) => (
+            <ul className="flex flex-wrap justify-center gap-x-8 gap-y-6">
+              {contributors.map((c) => (
                 <li key={c.login}>
                   <a
                     href={c.htmlUrl}
-                    title={`${c.login} - ${c.contributions} commits`}
-                    className="block rounded-full ring-1 ring-(--line) transition-transform hover:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--live)"
+                    className="group flex w-20 flex-col items-center gap-2 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--live)"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element -- remote avatar host is not allowlisted in next.config, and this page carries no CSP */}
                     <img
                       src={c.avatarUrl}
-                      alt={c.login}
-                      width={48}
-                      height={48}
+                      alt=""
+                      width={56}
+                      height={56}
                       loading="lazy"
-                      className="size-12 rounded-full"
+                      className="size-14 rounded-full ring-1 ring-(--line) transition-transform group-hover:scale-105"
                     />
+                    <span className="max-w-full truncate text-sm font-medium group-hover:text-(--live)">
+                      {c.login}
+                    </span>
+                    <span className="text-fd-muted-foreground font-mono text-xs">
+                      {c.contributions.toLocaleString()}{" "}
+                      {c.contributions === 1 ? "commit" : "commits"}
+                    </span>
                   </a>
                 </li>
               ))}

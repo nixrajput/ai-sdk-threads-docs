@@ -21,6 +21,9 @@ export function baseOptions(lang: string): BaseLayoutProps {
     // The package repo, not this site's. The footer already sends people there, and someone
     // clicking through from a package's docs wants the package.
     githubUrl: REPO_URL,
+    // Three states, not fumadocs' default two: light-dark writes an explicit theme on first
+    // click and offers no way back, so a visitor following their device could never return to it.
+    themeSwitch: { mode: "light-dark-system" },
     links: [
       { text: "Docs", url: `/${lang}/docs`, active: "nested-url" },
       { text: "API", url: `/${lang}/docs/api`, active: "nested-url" },
