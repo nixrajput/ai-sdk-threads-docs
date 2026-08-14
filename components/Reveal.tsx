@@ -34,7 +34,9 @@ export function Reveal({
           }
         }
       },
-      { rootMargin: "0px 0px -10% 0px", threshold: 0.1 },
+      // Fires before the section arrives, not after. Shrinking the box made each full-height
+      // section pop in once the reader was already inside it, which reads as a bounce per section.
+      { rootMargin: "0px 0px 25% 0px", threshold: 0 },
     );
     obs.observe(el);
     return () => obs.disconnect();

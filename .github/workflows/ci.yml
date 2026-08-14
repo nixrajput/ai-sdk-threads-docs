@@ -15,7 +15,6 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run types:check
-      - run: npm run check:samples
       - run: npm run format:check
       - run: npm run check:spell
       - run: npm run build
@@ -38,3 +37,8 @@ jobs:
           [ $ROUTES -eq 0 ] && [ $VITALS -eq 0 ]
         env:
           BASE_URL: http://localhost:3000
+
+      # Last on purpose: this typechecks the docs samples against the package published to npm,
+      # so it is legitimately red whenever a documented API is not released yet. Running it
+      # earlier meant its failure skipped the build, the routes and the budgets behind it.
+      - run: npm run check:samples

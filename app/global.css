@@ -22,12 +22,21 @@ html > body[data-scroll-locked] {
   --removed-body-scroll-bar-size: 0px !important;
 }
 
+/* Anchor jumps glide between full-height sections instead of cutting. The reduced-motion
+   block below turns this off again. */
+html {
+  scroll-behavior: smooth;
+}
+
 /* Full-bleed shell, bounded text - the shape ui.shadcn.com uses (its sections span the viewport,
    its h1 stops at 896px). The nav reads --site-width too, so the two cannot drift apart again:
    the sections were 768px under a 1400px nav. */
 :root {
   --site-width: 100%;
   --site-measure: 56rem;
+  /* The header plus the section bar, plus a little air. STICKY_OFFSET in SectionNav.tsx is the
+     same number: they name one line, and 105 vs 116 left sections 11px below the fold. */
+  --sticky-chrome: 116px;
 }
 
 /* The nav and the content wrapper each declare this locally (the wrapper caps its children with
@@ -143,6 +152,10 @@ html > body[data-scroll-locked] {
   border-radius: 0.875rem;
   background-color: var(--color-fd-card);
   box-shadow: 0 0 0 1px var(--line);
+  /* A grid or flex item cannot shrink below its content by default, so a card holding a long code
+     line grew to 535px inside a 320px phone and the section clipped it - the overflow-x on the pre
+     never engaged because the card had already stretched. */
+  min-width: 0;
 }
 
 /* Cards stretched to ~460px each at 1920 because the grid inherited the full-bleed section width.
@@ -198,9 +211,69 @@ html > body[data-scroll-locked] {
   }
 }
 
+/* Fumadocs gives nav links a colour change and nothing else, which reads as flat beside the icon
+   buttons next to them. The :not([aria-label]) excludes those icon buttons, which share data-active.
+   Both headers: the notebook docs layout renders #nd-subnav, not the home #nd-nav, so scoping this
+   to one id left every docs and API page with no marker at all. */
+:is(#nd-nav, #nd-subnav) a[data-active]:not([aria-label]) {
+  position: relative;
+  padding: 0.375rem 0.625rem;
+  margin-inline: 0.0625rem;
+  border-radius: 0.5rem;
+}
+
+:is(#nd-nav, #nd-subnav) a[data-active]:not([aria-label]):hover {
+  background-color: var(--color-fd-accent);
+}
+
+:is(#nd-nav, #nd-subnav) a[data-active="true"]:not([aria-label])::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0.625rem;
+  bottom: 0.0625rem;
+  height: 2px;
+  border-radius: 1px;
+  background-color: var(--color-fd-primary);
+}
+
+/* One nav item nests inside another - /docs/api is under /docs - so nested-url marks both active
+   and two links underline at once. Only the deepest keeps the marker, which works because
+   layout.shared.tsx lists a parent before its child. */
+:is(#nd-nav, #nd-subnav)
+  a[data-active="true"]:not([aria-label]):has(~ a[data-active="true"]:not([aria-label]))::after {
+  display: none;
+}
+
+/* The header and the section bar both stick, so an anchor jump would land the heading behind
+   them. Matches STICKY_OFFSET in SectionNav.tsx, which decides the same line for highlighting. */
+/* Scoped to the home shell: bare ids would also catch a docs heading whose slug is the same
+   word, turning an ordinary `## Overview` into a full-height grey band mid-article. */
+#nd-home-layout :is(#overview, #route, #branching, #coverage, #requirements, #compare, #project) {
+  scroll-margin-top: var(--sticky-chrome);
+  /* svh, not vh: on mobile vh is the chrome-hidden viewport, so a section sized that way
+     overflows once the chrome appears, and dvh reflows mid-scroll as it hides and shows.
+     Minus the two sticky bars, or every section would hide that much of itself. */
+  min-height: calc(100svh - var(--sticky-chrome));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* A wide table inside its own scroller still painted past the viewport once every section had
+     revealed, which let the whole page slide sideways. clip, so overflow-y stays visible. */
+  overflow-x: clip;
+}
+
+/* Alternating bands, so a section boundary is visible without a rule between them. */
+#nd-home-layout :is(#route, #coverage, #compare) {
+  background-color: var(--color-fd-muted);
+}
+
 /* Utility-driven motion (the row hover, the card lift) is covered here in one place rather than rule
    by rule; the keyframe animations above are already gated on no-preference. */
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   *,
   *::before,
   *::after {
@@ -232,6 +305,10 @@ html > body[data-scroll-locked] {
     opacity 0.6s ease,
     transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
   transition-delay: var(--rise-delay, 0s);
+  /* The transform makes this a containing block, which stops a descendant's own overflow-x:auto
+     from containing it: the wide compare table leaked page scroll at 390px until its section
+     revealed. clip rather than hidden, so overflow-y stays visible. */
+  overflow-x: clip;
 }
 
 .reveal.is-in {

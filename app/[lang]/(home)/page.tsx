@@ -2,15 +2,25 @@ import { Hero } from "@/components/Hero";
 import { BoilerplateContrast } from "@/components/BoilerplateContrast";
 import { BranchTree } from "@/components/BranchTree";
 import { FeatureGrid } from "@/components/FeatureGrid";
+import { SupportMatrix } from "@/components/SupportMatrix";
+import { Comparison } from "@/components/Comparison";
+import { ProjectStats } from "@/components/ProjectStats";
 import { InstallCommand } from "@/components/InstallCommand";
 import { Reveal } from "@/components/Reveal";
+import { SectionNav } from "@/components/SectionNav";
 import { NPM_URL, REPO_URL } from "@/lib/shared";
+
+// Stats fetches revalidate every 10 minutes (see lib/stats.ts); pinning the route to the
+// same window stops static generation from freezing them at build time regardless.
+export const revalidate = 600;
 
 export default async function HomePage(props: PageProps<"/[lang]">) {
   const { lang } = await props.params;
 
   return (
     <main>
+      {/* This page's own sections, so the bar belongs to it rather than to the shared layout. */}
+      <SectionNav />
       <Hero lang={lang} />
       <Reveal>
         <BoilerplateContrast />
@@ -20,6 +30,15 @@ export default async function HomePage(props: PageProps<"/[lang]">) {
       </Reveal>
       <Reveal>
         <FeatureGrid />
+      </Reveal>
+      <Reveal>
+        <SupportMatrix />
+      </Reveal>
+      <Reveal>
+        <Comparison />
+      </Reveal>
+      <Reveal>
+        <ProjectStats />
       </Reveal>
       <Reveal>
         <section className="mx-auto flex w-full max-w-(--content-width) flex-col items-center gap-4 px-4 py-16 text-center">

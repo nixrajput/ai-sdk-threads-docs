@@ -19,6 +19,9 @@ const i18nProxy = createI18nMiddleware(i18n);
 // by the i18n proxy below.
 const NON_LOCALIZED_ROUTES = [
   '/_next',
+  // Vercel's edge serves the Web Analytics script here; a locale prefix 404s it,
+  // so analytics silently collects nothing.
+  '/_vercel',
   '/favicon.ico',
   '/icon.svg',
   '/apple-icon',

@@ -25,13 +25,21 @@ const FEATURES = [
     title: "Zero runtime dependencies",
     body: "ai, drizzle-orm and resumable-stream are peers, the last two optional. Install only what you use.",
   },
+  {
+    title: "Keyset pagination",
+    body: "listThreads pages by cursor rather than OFFSET, so page 400 costs one query, same as page 1.",
+  },
+  {
+    title: "Edge-safe core",
+    body: "No Node globals anywhere in src, enforced by a second typecheck that compiles without Node types.",
+  },
 ];
 
 export function FeatureGrid() {
   return (
     /* The one muted band on the page: it separates this block from the sections around it, which is
        what the rules between sections were doing less quietly. */
-    <section className="bg-fd-muted w-full px-4 py-16 sm:py-20">
+    <section id="coverage" className="w-full px-4 py-16 sm:py-20">
       <div className="mx-auto w-full max-w-(--content-width)">
         <p className="font-display text-xs font-semibold tracking-[0.2em] text-(--muted) uppercase">
           Coverage

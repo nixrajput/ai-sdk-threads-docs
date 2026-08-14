@@ -1,0 +1,34 @@
+---
+title: API reference
+description: Every export ai-sdk-threads ships, grouped by what you reach for it to do.
+---
+
+Everything here builds on one object. A store, created once from your drizzle instance, holds the threads and messages; the rest of the API is what that store can do and the route handlers that drive it.
+
+New to the package? [Getting started](/en/docs/getting-started) is a shorter path in.
+
+## The route
+
+[`chatHandler`](/en/docs/api/chat-handler) is the whole chat route: it loads the thread, stores the incoming message, streams the answer, and stores the reply. Every option, what it does in order, and how to secure a thread.
+
+[`resumableChat`](/en/docs/api/resumable-chat) adds the POST, GET and DELETE trio, so a reload mid-answer picks the stream back up. Covers the Redis-backed context you need beyond a single instance.
+
+## Storing and reading
+
+[The store](/en/docs/api/store) covers `createThreadStore` and every thread and message method, keyset pagination, `orderPath`, and how many round trips each operation costs.
+
+[Branching](/en/docs/api/branching) is regenerate, edit-and-fork and sibling navigation - the tree behind them, and why nothing is ever overwritten.
+
+## Converting
+
+[`convertToUIMessages`](/en/docs/api/convert) turns `ModelMessage[]` back into `UIMessage[]`, the direction the AI SDK still does not ship.
+
+## Your database
+
+[Schema](/en/docs/api/schema) lists both tables, every column, and why the timestamps are millisecond precision.
+
+[SQLite](/en/docs/api/sqlite) is the same contract over SQLite, plus the three constraints that are not optional.
+
+## Migrating
+
+Moving between AI SDK majors, or arriving from elsewhere? [Migrating](/en/docs/migrating) explains `sdk_version` and the `migrate` CLI, and [Importing](/en/docs/importing) brings over the Vercel `ai-chatbot` template's tables.
