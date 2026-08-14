@@ -35,7 +35,7 @@ A `Thread` is `{ id, userId, title, visibility, activeLeafId, metadata, createdA
 
 ### Keyset pagination
 
-`listThreads` pages with a keyset cursor over `(createdAt, id)`, not `OFFSET`, so page 400 costs what page 1 does. Pass `nextCursor` back and stop when it comes back `undefined`:
+`listThreads` pages with a keyset cursor over `(createdAt, id)`, not `OFFSET`. Pass `nextCursor` back and stop when it comes back `undefined`:
 
 ```ts fragment
 let cursor: string | undefined;
