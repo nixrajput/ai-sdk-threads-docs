@@ -101,7 +101,7 @@ function isAbsent(cell: string) {
   return cell === "No" || cell === "-";
 }
 
-export function Comparison() {
+export function Comparison({ lang }: { lang: string }) {
   return (
     <section id="compare" className="w-full px-4 py-16 sm:py-20">
       <div className="mx-auto w-full max-w-(--content-width)">
@@ -158,6 +158,7 @@ export function Comparison() {
                             className="mr-1.5 inline-block size-1.5 rounded-full bg-(--live) align-middle"
                           />
                         )}
+                        {leads && <span className="sr-only">Leads: </span>}
                         {row.cells[c.key]}
                       </dd>
                     </div>
@@ -245,7 +246,7 @@ export function Comparison() {
           managed experience, assistant-ui and Convex are good at it. This exists for the case where
           the conversation has to stay in a database you control, and where regenerate and edit need
           to survive a reload. If you started from the Vercel template, its tables{" "}
-          <Link href="/en/docs/importing" className="underline">
+          <Link href={`/${lang}/docs/importing`} className="underline">
             import straight across
           </Link>
           .

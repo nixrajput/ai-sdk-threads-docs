@@ -26,7 +26,7 @@ export default async function HomePage(props: PageProps<"/[lang]">) {
         <BoilerplateContrast />
       </Reveal>
       <Reveal>
-        <BranchTree />
+        <BranchTree lang={lang} />
       </Reveal>
       <Reveal>
         <FeatureGrid />
@@ -35,7 +35,7 @@ export default async function HomePage(props: PageProps<"/[lang]">) {
         <SupportMatrix />
       </Reveal>
       <Reveal>
-        <Comparison />
+        <Comparison lang={lang} />
       </Reveal>
       <Reveal>
         <ProjectStats />

@@ -70,7 +70,7 @@ function depthOf(row: Row): number {
   return depth;
 }
 
-export function BranchTree() {
+export function BranchTree({ lang }: { lang: string }) {
   const [branch, setBranch] = useState<(typeof BRANCHES)[number]>(BRANCHES[1]);
   const path = orderPath(branch.leaf);
   const onPath = new Set(path.map((row) => row.id));
@@ -211,7 +211,7 @@ export function BranchTree() {
             vercel/ai#2929
           </a>
           , open since 2024).{" "}
-          <Link href="/en/playground" className="underline hover:text-(--live)">
+          <Link href={`/${lang}/playground`} className="underline hover:text-(--live)">
             Run it against a real database
           </Link>{" "}
           in your browser.

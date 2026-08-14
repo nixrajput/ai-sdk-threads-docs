@@ -56,6 +56,28 @@ async function fetchJson(url: string): Promise<unknown> {
   }
 }
 
+const iso = (date: Date) => date.toISOString().slice(0, 10);
+
+/**
+ * npm's /downloads/range answers at most 18 months per query and silently drops anything
+ * older, so a single first-publish-to-today range would quietly stop being all-time in
+ * February 2028. Windows of 540 days stay inside that cap: one request until then, two after.
+ */
+function downloadWindows(from: string, to: string): [string, string][] {
+  const WINDOW_DAYS = 540;
+  const end = new Date(`${to}T00:00:00Z`);
+  const windows: [string, string][] = [];
+  for (let start = new Date(`${from}T00:00:00Z`); start <= end;) {
+    const stop = new Date(start);
+    stop.setUTCDate(stop.getUTCDate() + WINDOW_DAYS - 1);
+    const last = stop < end ? stop : end;
+    windows.push([iso(start), iso(last)]);
+    start = new Date(last);
+    start.setUTCDate(start.getUTCDate() + 1);
+  }
+  return windows;
+}
+
 /**
  * All the live project stats the home page shows, in one call. Each source can fail
  * independently (rate limit, network) - on failure that stat is omitted rather than
@@ -63,9 +85,13 @@ async function fetchJson(url: string): Promise<unknown> {
  * truth is just "npm didn't answer".
  */
 export async function getProjectStats(): Promise<ProjectStats> {
-  const today = new Date().toISOString().slice(0, 10);
+  const windows = downloadWindows(FIRST_PUBLISH, iso(new Date()));
   const [downloads, repo, contributors, suiteTests] = await Promise.all([
-    fetchJson(`https://api.npmjs.org/downloads/range/${FIRST_PUBLISH}:${today}/ai-sdk-threads`),
+    Promise.all(
+      windows.map(([from, to]) =>
+        fetchJson(`https://api.npmjs.org/downloads/range/${from}:${to}/ai-sdk-threads`),
+      ),
+    ),
     fetchJson(`https://api.github.com/repos/${REPO}`),
     fetchJson(`https://api.github.com/repos/${REPO}/contributors`),
     fetchSuiteTests(),
@@ -74,10 +100,19 @@ export async function getProjectStats(): Promise<ProjectStats> {
   const stats: ProjectStats = {};
   if (suiteTests !== undefined) stats.suiteTests = suiteTests;
 
-  const days = (downloads as { downloads?: { downloads: number }[] } | undefined)?.downloads;
-  if (Array.isArray(days)) {
-    stats.totalDownloads = days.reduce((sum, day) => sum + (day.downloads ?? 0), 0);
+  // Every window has to answer: a partial sum under an all-time label undercounts, which is
+  // the same lie as a zero.
+  let total = 0;
+  let complete = true;
+  for (const window of downloads) {
+    const days = (window as { downloads?: { downloads: number }[] } | undefined)?.downloads;
+    if (!Array.isArray(days)) {
+      complete = false;
+      break;
+    }
+    for (const day of days) total += day.downloads ?? 0;
   }
+  if (complete) stats.totalDownloads = total;
 
   const repoData = repo as { stargazers_count?: unknown; forks_count?: unknown } | undefined;
   if (typeof repoData?.stargazers_count === "number") stats.stars = repoData.stargazers_count;
