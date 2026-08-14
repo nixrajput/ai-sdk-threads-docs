@@ -5,14 +5,23 @@ export async function ProjectStats() {
 
   // Every live cell is gated on a nonzero value, not merely a present one: a "0" in display
   // type is dead weight, and each cell appears on its own once its number means something.
+  // The order is shared with the sibling docs site, with slot three carrying whichever fact
+  // belongs to this package.
   const cells: { label: string; value: string }[] = [];
   if (stats.monthlyDownloads) {
     cells.push({ label: "downloads a month", value: stats.monthlyDownloads.toLocaleString() });
   }
+  if (stats.gzipBytes) {
+    // 1024-based to two decimals, exactly as `npm run report` prints it.
+    cells.push({
+      label: "minified + gzipped",
+      value: `${(stats.gzipBytes / 1024).toFixed(2)} kB`,
+    });
+  }
   if (stats.unpackedBytes) {
     cells.push({
       label: "unpacked size",
-      value: `${Math.round(stats.unpackedBytes / 1024).toLocaleString()} KB`,
+      value: `${Math.round(stats.unpackedBytes / 1024).toLocaleString()} kB`,
     });
   }
   if (stats.stars) {

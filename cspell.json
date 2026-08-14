@@ -3,10 +3,12 @@
   "version": "0.2",
   "language": "en,en-GB",
   "words": [
+    "Bundlephobia",
     "cnfast",
     "Emscripten",
     "frontmatter",
     "fumadocs",
+    "KHTML",
     "libsql",
     "libsql's",
     "lifecycles",

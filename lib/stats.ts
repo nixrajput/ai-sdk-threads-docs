@@ -15,18 +15,24 @@ export interface Contributor {
 export interface ProjectStats {
   unpackedBytes?: number;
   monthlyDownloads?: number;
+  gzipBytes?: number;
   stars?: number;
   forks?: number;
   contributors?: Contributor[];
 }
 
+// Bundlephobia 403s a plain client, which is why `npm run report` in the package sets this too.
+const BROWSER_UA =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
+
 // The route is server-rendered, so a hung upstream would hold the response open rather than
 // merely lose a number. A missed deadline degrades to an omitted stat like any other failure.
 const REQUEST_TIMEOUT_MS = 4000;
 
-async function fetchJson(url: string): Promise<unknown> {
+async function fetchJson(url: string, headers?: HeadersInit): Promise<unknown> {
   try {
     const res = await fetch(url, {
+      headers,
       next: { revalidate: REVALIDATE_SECONDS },
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
@@ -43,12 +49,19 @@ async function fetchJson(url: string): Promise<unknown> {
  * truth is just "npm didn't answer".
  */
 export async function getProjectStats(): Promise<ProjectStats> {
-  const [downloads, registry, repo, contributors] = await Promise.all([
+  const [downloads, bundle, registry, repo, contributors] = await Promise.all([
     // A rolling 30-day point query rather than a range from first publish: a rate stays
     // meaningful as the package ages, where a lifetime total only ever grows, and a point
     // query cannot run into the 18-month cap that silently truncates a long range. npm's
     // window closes a few days back - that lag is theirs, and the label says "a month".
     fetchJson("https://api.npmjs.org/downloads/point/last-month/ai-sdk-threads"),
+    // The same endpoint `npm run report` reads and npm's own bundle-size panel shows, so the
+    // three cannot disagree. No version in the query: the bare name follows whatever is latest,
+    // where a pinned one goes stale silently. Bundlephobia builds a cold version on demand and
+    // can outrun the timeout, in which case the card is omitted until the next revalidation.
+    fetchJson("https://bundlephobia.com/api/size?package=ai-sdk-threads", {
+      "User-Agent": BROWSER_UA,
+    }),
     fetchJson("https://registry.npmjs.org/ai-sdk-threads/latest"),
     fetchJson(`https://api.github.com/repos/${REPO}`),
     // per_page=100, since the card prints this length as the contributor count and the
@@ -61,6 +74,10 @@ export async function getProjectStats(): Promise<ProjectStats> {
 
   const monthly = (downloads as { downloads?: unknown } | undefined)?.downloads;
   if (typeof monthly === "number") stats.monthlyDownloads = monthly;
+
+  // Minified and gzipped, the figure a bundler would add to a client build.
+  const gzip = (bundle as { gzip?: unknown } | undefined)?.gzip;
+  if (typeof gzip === "number") stats.gzipBytes = gzip;
 
   // The published tarball unpacked, which is the entire install: the core declares no runtime
   // dependencies, so nothing else arrives alongside it.
