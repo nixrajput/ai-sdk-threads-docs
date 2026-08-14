@@ -32,7 +32,7 @@ const ROWS: {
       migration: "sdk_version on every row, plus a migrate CLI",
       ui: "No - ai-elements and assistant-ui own that layer",
       hosted: "No",
-      cost: "MIT, no service",
+      cost: "MIT core, self-hosted",
     },
   },
   {
@@ -243,9 +243,11 @@ export function Comparison({ lang }: { lang: string }) {
         </div>
         <p className="text-fd-muted-foreground mt-4 text-sm">
           Nothing here is a like-for-like competitor, which is rather the point. If you want the
-          managed experience, assistant-ui and Convex are good at it. This exists for the case where
-          the conversation has to stay in a database you control, and where regenerate and edit need
-          to survive a reload. If you started from the Vercel template, its tables{" "}
+          managed experience, assistant-ui and Convex are good at it. The store, both adapters,
+          branching, resumable streams and the migration tooling are MIT and stay that way. This
+          exists for the case where the conversation has to stay in a database you control, and
+          where regenerate and edit need to survive a reload. If you started from the Vercel
+          template, its tables{" "}
           <Link href={`/${lang}/docs/importing`} className="underline">
             import straight across
           </Link>
