@@ -31,4 +31,4 @@ The CLI needs a Postgres driver of its own - `npm i -D pg` - because this packag
 
 ## Why `Message_v2` exists at all
 
-The template carries a `Message_v2` table because migrating the original `Message` table in place was not practical when the stored shape changed. That is the problem `sdk_version` exists to avoid here - see [Migrating](/en/docs/migrating).
+When the stored message shape changed, migrating the original `Message` table in place was not practical, so the template added `Message_v2` beside it, backfilled, and later dropped the original. The old table is gone; the version number is still in the name of the one you have. That is the problem `sdk_version` exists to avoid here - see [Migrating](/en/docs/migrating).
