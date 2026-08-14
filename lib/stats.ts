@@ -51,7 +51,10 @@ export async function getProjectStats(): Promise<ProjectStats> {
     fetchJson("https://api.npmjs.org/downloads/point/last-month/ai-sdk-threads"),
     fetchJson("https://registry.npmjs.org/ai-sdk-threads/latest"),
     fetchJson(`https://api.github.com/repos/${REPO}`),
-    fetchJson(`https://api.github.com/repos/${REPO}/contributors`),
+    // per_page=100, since the card prints this length as the contributor count and the
+    // endpoint pages at 30 by default. One request covers any plausible size for this repo;
+    // past 100 it would need real pagination, which is a happier problem than it sounds.
+    fetchJson(`https://api.github.com/repos/${REPO}/contributors?per_page=100`),
   ]);
 
   const stats: ProjectStats = {};
