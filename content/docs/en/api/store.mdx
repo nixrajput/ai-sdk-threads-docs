@@ -48,7 +48,9 @@ do {
 
 The timestamp columns are deliberately millisecond precision for this reason - see [Schema](/en/docs/api/schema#why-millisecond-precision).
 
-Pinned rather than asserted: [`test/queries.test.ts`](https://github.com/nixrajput/ai-sdk-threads/blob/main/test/queries.test.ts) pages past the first result set by cursor and requires the deeper page to cost the same single statement, so an `OFFSET` scan creeping in fails CI.
+Pinned and measured, not asserted. [`test/queries.test.ts`](https://github.com/nixrajput/ai-sdk-threads/blob/main/test/queries.test.ts) walks every cursor page of a full traversal and requires each to cost one statement, and it pins the *shape* of the predicate too - a row-value comparison, `(created_at, id) < ($1, $2)`, which Postgres can use as an index bound.
+
+That shape is the whole property. The classic `created_at < $1 OR (created_at = $1 AND id < $2)` form costs one statement as well, but it is an index *filter*: Postgres walks the user's range from the top and discards, which measured **9.2ms with 50,000 rows before the cursor** against **0.012ms** for the row-value form. End to end through the store on Postgres 16 over 100,000 threads, a page 50,000 rows deep came back at **1.11x** the first page, and 90,000 rows deep at 1.10x - medians over six and three runs, with [the harness in the repo](https://github.com/nixrajput/ai-sdk-threads/blob/main/bench/paging.measure.ts) so you can re-run it.
 
 ## Round trips
 
