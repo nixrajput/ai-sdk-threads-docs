@@ -36,6 +36,7 @@ So regenerate and edit work with no extra code.
 | `forkAt(threadId, messageId, messages)` | `Promise<StoredMessage[]>` | New branch from that message's parent. |
 | `replaceMessage(threadId, messageId, msg)` | `Promise<StoredMessage>` | Rewrites a message, keeping its id; the old version becomes a sibling. |
 | `regenerateFrom(threadId, messageId)` | `Promise<{ leafId }>` | Points the leaf where a fresh answer belongs. |
+| `pruneBranches(threadId)` | `Promise<StoredMessage[]>` | Deletes every message the active leaf cannot reach, and returns them. Never automatic. |
 
 **Every one takes a `threadId`.** Message ids are a global primary key, so an id passed without its thread could reach another user's messages - these refuse an id that does not belong to the thread named.
 
@@ -67,3 +68,33 @@ The edited row is rewritten in place and the previous version is archived under 
 const tree = await store.getTree(threadId);
 if (tree[0]) await store.setActiveLeaf(threadId, tree[0].id);
 ```
+
+## What abandoned branches cost
+
+Nothing is ever deleted, which is the point - but the cost is not free, and it is not where you would look for it. `loadMessages` runs two queries at any depth: one for the thread, one that fetches **every row in the thread** and walks the path in memory. The query count stays flat as a conversation grows; the payload does not. Abandoned branches ride along on every read.
+
+Measured on a 50-message conversation (`bench/growth.measure.ts` in the package repo, re-runnable):
+
+| Thread state | Live path | Rows stored | Rows fetched per read |
+| --- | --- | --- | --- |
+| 25 turns, never branched | 50 | 50 | **1.00x** |
+| After 20 regenerations of the last answer | 50 | 70 | **1.40x** |
+| After editing question 5 | 12 | 72 | **6.00x** |
+| After `pruneBranches` | 12 | 12 | **1.00x** |
+
+**Regenerating is cheap; editing early is not.** A regeneration strands exactly one message. Rewriting question 5 of a 25-turn thread strands every one of the 38 messages below it at once, and the thread carries that weight on every load from then on.
+
+## Discarding the branches
+
+<Callout type="warn">
+`pruneBranches` is permanent. It deletes the rows, and abandoned branches are the history the tree exists to keep - so it is never automatic, never a side effect of a regeneration, and always something your application decides to do.
+</Callout>
+
+```ts fragment
+const dropped = await store.pruneBranches(threadId);
+console.log(`discarded ${dropped.length} messages off the live path`);
+```
+
+It returns what it removed, oldest first, so you can log or archive before the rows are gone for good. It is idempotent - a second call on an unbranched thread returns `[]` - and a thread with no active leaf prunes nothing, because "delete everything unreachable" must not collapse into "delete everything".
+
+Reach for it on a schedule or behind a user action ("clear alternatives"), not in the chat route.
