@@ -74,12 +74,12 @@ Every operation sends a fixed number of statements, independent of how much data
 | Operation | Statements |
 | --- | --- |
 | `getThread`, `listThreads`, `createThread`, `updateThread`, `deleteThread` | 1 |
-| `loadMessages`, `getTree`, `siblingsOf`, `setActiveLeaf` | 2 |
-| `appendMessages`, `regenerateFrom` | 3 |
-| `forkAt` | 4 |
+| `loadMessages`, `getTree`, `siblingsOf` | 2 |
+| `appendMessages`, `regenerateFrom`, `setActiveLeaf` | 3 |
+| `forkAt`, `pruneBranches` | 4 |
 | `replaceMessage` | 6 |
 
-`loadMessages` stays at two - one select for the active leaf, one for the thread's rows - at depth 1 or depth 500, because the root-to-leaf path is walked in memory by [`orderPath`](#orderpathrows-activeleafid) rather than with a recursive CTE.
+`loadMessages` stays at two - one select for the active leaf, one for the thread's rows - at depth 1 or depth 500, because the root-to-leaf path is walked in memory by [`orderPath`](#orderpathrows-activeleafid) rather than with a recursive CTE. That second select fetches the whole thread, abandoned branches included, so the statement count is flat while the payload is not - see [what abandoned branches cost](/en/docs/api/branching#what-abandoned-branches-cost). `pruneBranches` stays at four however many rows it drops: one delete, not one per row.
 
 These are the statements the query builder issues. The write paths run in a transaction, so on the wire they cost **two more** - `begin` and `commit` - which server logs confirm: one `appendMessages` sends `begin`, `select`, `insert`, `update`, `commit`. Budget five round trips for an append and six for a fork. `listThreads` stays at one statement for a deep page as well as the first. The counts are pinned by a test in the package (`test/queries.test.ts`), so an N+1 introduced anywhere fails CI, and they were confirmed unchanged against a real PostgreSQL 16 server as well as the in-process PGlite the suite uses.
 
