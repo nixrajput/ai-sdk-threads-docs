@@ -95,6 +95,6 @@ const dropped = await store.pruneBranches(threadId);
 console.log(`discarded ${dropped.length} messages off the live path`);
 ```
 
-It returns what it removed, oldest first, so you can log or archive before the rows are gone for good. It is idempotent - a second call on an unbranched thread returns `[]` - and a thread with no active leaf prunes nothing, because "delete everything unreachable" must not collapse into "delete everything".
+It returns what it removed, oldest first - but the rows are already deleted by the time the promise resolves, so those are in-memory copies and nothing more. Log them if it helps; if you need the branches to survive, write them somewhere durable **before** you call this. It is idempotent - a second call on an unbranched thread returns `[]` - and a thread with no active leaf prunes nothing, because "delete everything unreachable" must not collapse into "delete everything".
 
 Reach for it on a schedule or behind a user action ("clear alternatives"), not in the chat route.

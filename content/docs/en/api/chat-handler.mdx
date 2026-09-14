@@ -78,11 +78,11 @@ It guards the **request**, not the store - and the distinction is the one that c
 
 | Route | When `authorize` runs | On refusal |
 | --- | --- | --- |
-| `chatHandler` `POST` | Once, before anything else, for an **existing** thread | `403 Forbidden` |
+| `chatHandler` `POST` | Once, after the body parses and the thread loads, for an **existing** thread | `403 Forbidden` |
 | `resumeHandler` `GET` / `DELETE` | Separately on each | `204 No Content` |
 | Any store call you make yourself | **Never** | - |
 
-One check covers the whole `POST`, because a turn is a single logical operation on a single thread: load, append, stream and persist all sit behind it. The resume routes answer `204` rather than `403` on purpose, so a prober cannot tell "not your thread" from "nothing to resume".
+One check covers the whole `POST`, because a turn is a single logical operation on a single thread: append, stream and persist all sit behind it. A malformed body is rejected with a 400 before `authorize` is reached, since there is no thread id to authorize against until the body parses. The resume routes answer `204` rather than `403` on purpose, so a prober cannot tell "not your thread" from "nothing to resume".
 
 <Callout type="warn">
 The store methods check nothing. `loadMessages`, `appendMessages`, `regenerateFrom`, `setActiveLeaf`, `siblingsOf`, `getTree` and `pruneBranches` are raw data access - they trust the thread id you hand them. So the branching routes you write yourself (the previous/next control, the edit button, a thread list) are **yours to guard**. Wiring `chatHandler` correctly does not protect them.
