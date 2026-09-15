@@ -1,9 +1,9 @@
 const REPO = "nixrajput/ai-sdk-threads";
 
-// Short window, not version.ts's hourly one: GitHub's unauthenticated API caps at 60
-// requests/hour/IP, so every fetch here must be cached, but visitors still want numbers
-// that move within a session rather than numbers frozen at build time.
-const REVALIDATE_SECONDS = 600;
+// 6h. GitHub's unauthenticated API caps at 60 requests/hour/IP and this route is dynamic, so a
+// short window means every visitor's render can hit five upstream APIs. Nothing behind these
+// numbers moves faster anyway: npm rolls downloads up daily, and size only changes on publish.
+const REVALIDATE_SECONDS = 21600;
 
 export interface Contributor {
   login: string;

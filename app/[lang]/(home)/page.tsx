@@ -10,9 +10,10 @@ import { Reveal } from "@/components/Reveal";
 import { SectionNav } from "@/components/SectionNav";
 import { NPM_URL, REPO_URL } from "@/lib/shared";
 
-// Stats fetches revalidate every 10 minutes (see lib/stats.ts); pinning the route to the
-// same window stops static generation from freezing them at build time regardless.
-export const revalidate = 600;
+// Pinned to the stats fetch window in lib/stats.ts. This route is dynamic - no
+// generateStaticParams for the locale - so it re-renders per request, and the window governs how
+// often the upstream npm and GitHub calls repeat rather than how often a page is regenerated.
+export const revalidate = 21600;
 
 export default async function HomePage(props: PageProps<"/[lang]">) {
   const { lang } = await props.params;
