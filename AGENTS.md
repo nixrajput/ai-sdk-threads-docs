@@ -10,7 +10,7 @@ This repo is the documentation site for the **ai-sdk-threads** npm package, depl
 
 | Area          | Detail                                                     |
 | ------------- | ---------------------------------------------------------- |
-| Language      | TypeScript, ESM only, Node `>=20.9`                        |
+| Language      | TypeScript, ESM only, Node `^22.22` or `>=24`              |
 | Framework     | Next.js 16 (App Router) + Fumadocs                         |
 | Lint / format | ESLint + Prettier - double quotes, semicolons, 100 columns |
 | Content       | MDX under `content/docs/en/`                               |

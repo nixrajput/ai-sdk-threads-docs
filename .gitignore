@@ -49,3 +49,11 @@ next-env.d.ts
 *.crt
 *.cert
 secrets/
+
+# Local databases and their SQLite sidecars (-journal, -wal, -shm)
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
