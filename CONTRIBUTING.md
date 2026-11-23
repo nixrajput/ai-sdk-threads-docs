@@ -8,7 +8,7 @@ Please review and adhere to our [Code of Conduct](CODE_OF_CONDUCT.md). We expect
 
 ## Getting set up
 
-Requires Node.js `>=22.22` and npm.
+Requires Node.js `^22.22` or `>=24`, and npm.
 
 ```bash
 git clone https://github.com/nixrajput/ai-sdk-threads-docs.git
@@ -55,7 +55,7 @@ npm run build         # next build
 
 - **Commits:** Conventional Commits (`docs:`, `fix:`, `feat:`, `ci:`, `chore:`, `refactor:`), imperative subject, no trailing period.
 - **Style:** Prettier, double quotes, semicolons, 100-column lines. Do not hand-format - run `npm run format`.
-- **Language:** TypeScript, ESM only, Node `>=22.22`.
+- **Language:** TypeScript, ESM only, Node `^22.22` or `>=24`.
 - **Comments:** explain why, not what. Most code needs none.
 
 ## Reporting issues

@@ -12,6 +12,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     permissions:
+      actions: write # delete the cached run state
       issues: write
       pull-requests: write
     steps:
