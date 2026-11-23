@@ -49,3 +49,9 @@ next-env.d.ts
 *.crt
 *.cert
 secrets/
+
+# Local databases
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
