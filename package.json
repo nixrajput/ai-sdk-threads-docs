@@ -2,6 +2,9 @@
   "name": "ai-sdk-threads-docs",
   "private": true,
   "license": "MIT",
+  "engines": {
+    "node": "26.x"
+  },
   "scripts": {
     "prebuild": "node scripts/copy-pglite.mjs",
     "build": "next build",
