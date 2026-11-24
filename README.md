@@ -68,7 +68,7 @@ This repo holds the documentation content and the site that serves it, live at [
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) `>=20.9` - Next 16's own floor, so `20.0` through `20.8` will not install
+- [Node.js](https://nodejs.org/) `^22.22` or `>=24` - chokidar 6 (used by fumadocs-mdx) needs 22.22, and ESLint 10 does not support Node 23
 - npm
 
 ### Install
